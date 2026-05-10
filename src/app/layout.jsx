@@ -3,6 +3,8 @@ import "./globals.css";
 import ThemeProvider from "@/Componets/Provider/ThemeProvider";
 import Navvar from "@/Componets/Shared/Navvar";
 import { ToastContainer } from "react-toastify";
+import Header from "@/Componets/Shared/Header";
+import Footer from "@/Componets/Shared/Footer";
 
 const inter = Inter({
   weight: ["100", "200", "400", "600", "700", "800"],
@@ -60,8 +62,9 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <ThemeProvider>
           <ToastContainer />
-          <Navvar />
+          <Header />
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

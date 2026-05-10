@@ -89,7 +89,7 @@ export default function Navvar() {
           {/* Desktop Auth */}
           <div className="hidden sm:flex items-center gap-1">
             <Link
-              href="/login"
+              href="/auth/login"
               className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all ${
                 isLight
                   ? "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
@@ -99,7 +99,7 @@ export default function Navvar() {
               Sign In
             </Link>
             <Link
-              href="/signup"
+              href="/auth/signup"
               className="px-3.5 py-1.5 rounded-full text-[13px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-sm active:scale-95"
             >
               Join Free
@@ -147,14 +147,14 @@ export default function Navvar() {
 
             <div className="pt-4 mt-2 border-t border-white/[0.05] flex flex-col gap-2">
               <Link
-                href="/login"
+                href="/auth/login"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`text-center py-2 text-sm font-medium ${isLight ? "text-slate-600" : "text-slate-400"}`}
               >
                 Sign In
               </Link>
               <Link
-                href="/signup"
+                href="/auth/signup"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-center bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold"
               >
