@@ -1,34 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Phone,
-  User,
-  Upload,
-  Lock,
-  Sparkles,
-} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
+import RegisteForm from "@/Componets/Forms/RegisteForm";
 
 export default function Createaccount() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [showPassword, setShowPassword] = useState(false);
-  const [fileName, setFileName] = useState("");
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  const onSubmit = (data) => console.log(data);
 
   const inputClass = `w-full pl-11 pr-4 py-3.5 text-sm rounded-xl border outline-none transition-all duration-200 ${
     isDark
@@ -111,115 +90,7 @@ export default function Createaccount() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
-            {/* Name */}
-            <div className="relative">
-              <User
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                {...register("name", { required: true })}
-                placeholder="Full Name"
-                className={inputClass}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1 pl-1">
-                  Name is required
-                </p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="relative">
-              <Mail
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                {...register("email", { required: true })}
-                type="email"
-                placeholder="Email Address"
-                className={inputClass}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1 pl-1">
-                  Email is required
-                </p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div className="relative">
-              <Phone
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                {...register("phone")}
-                type="tel"
-                placeholder="Phone Number"
-                className={inputClass}
-              />
-            </div>
-
-            {/* Photo Upload */}
-            <label
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer text-sm transition-all ${
-                isDark
-                  ? "bg-white/[0.05] border-white/[0.08] text-slate-500 hover:border-violet-500/40"
-                  : "bg-white border-slate-200 text-slate-400 hover:border-violet-400/40"
-              }`}
-            >
-              <Upload size={16} className="text-slate-400 flex-shrink-0" />
-              <span className="truncate">
-                {fileName || "Upload Profile Photo"}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                {...register("photo")}
-                onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
-              />
-            </label>
-
-            {/* Password */}
-            <div className="relative">
-              <Lock
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                {...register("password", { required: true, minLength: 6 })}
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className={`${inputClass} pr-11`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-500 transition-colors"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1 pl-1">
-                  Min 6 characters required
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 text-white font-bold rounded-xl text-sm transition-all hover:opacity-90 active:scale-[0.98] mt-1"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-              }}
-            >
-              Create Free Account
-            </button>
-          </form>
+          <RegisteForm inputClass={inputClass} theme={theme} isDark={isDark} />
 
           {/* Divider */}
           <div className="relative my-6 text-center">

@@ -28,3 +28,8 @@ export const getAllContests = async () => {
   const database = await connectDB();
   return database.collection("AllContest");
 };
+
+export const getUsers = async () => {
+  const database = await connectDB();
+  return database.collection("User");
+};

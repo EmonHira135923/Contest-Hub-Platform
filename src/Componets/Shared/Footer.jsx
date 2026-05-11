@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
 import { FaXTwitter, FaLinkedinIn, FaYoutube, FaGithub } from "react-icons/fa6";
+import { usePathname } from "next/navigation";
 
 const LINKS = {
   Platform: [
@@ -37,6 +38,9 @@ const SOCIALS = [
 export default function Footer() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const pathName = usePathname();
+  if (pathName.startsWith("/auth")) return null;
+  if (pathName.startsWith("/dashboard")) return null;
 
   return (
     <footer

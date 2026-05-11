@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import Header from "@/Componets/Shared/Header";
 import Footer from "@/Componets/Shared/Footer";
 import ReactQueryProvider from "@/Componets/Provider/ReactQueryProvider";
+import { AuthProvider } from "@/Componets/Provider/AuthContext";
 
 const inter = Inter({
   weight: ["100", "200", "400", "600", "700", "800"],
@@ -60,14 +61,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ReactQueryProvider>
-          <ThemeProvider>
-            <ToastContainer />
-            <Header />
-            {children}
-            <Footer />
-          </ThemeProvider>
-        </ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>
+            <ThemeProvider>
+              <ToastContainer />
+              <Header />
+              {children}
+              <Footer />
+            </ThemeProvider>
+          </ReactQueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );
