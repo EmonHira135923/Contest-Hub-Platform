@@ -1,4 +1,8 @@
+import ClientReview from "@/Componets/Pages/Home/ClientReview";
+import CreatorAdveristement from "@/Componets/Pages/Home/CreatorAdveristement";
 import HeroBanner from "@/Componets/Pages/Home/HeroBanner";
+import PopularContest from "@/Componets/Pages/Home/PopularContest";
+import WinnerAdvertisment from "@/Componets/Pages/Home/WinnerAdvertisment";
 import React from "react";
 
 export const metadata = {
@@ -43,6 +47,10 @@ const Home = () => {
   return (
     <div>
       <HeroBanner />
+      <PopularContest />
+      <WinnerAdvertisment />
+      <CreatorAdveristement />
+      <ClientReview />
     </div>
   );
 };
