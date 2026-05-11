@@ -9,7 +9,7 @@ export default function HeroBanner() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("");
-  
+
   // API থেকে ডাইনামিক ক্যাটাগরি এবং ডাটা নিয়ে আসা
   const { categories, isLoading } = useAllContests(query, activeCategory);
   const { theme } = useTheme();
@@ -99,22 +99,30 @@ export default function HeroBanner() {
         </div>
 
         {/* Search bar */}
-        <div className="w-full max-w-2xl">
-          <div className="flex items-center gap-2 rounded-2xl p-2 shadow-2xl border bg-white overflow-hidden transition-focus-within:ring-4 ring-indigo-500/20">
-            <div className="pl-3">
-              <Search size={20} className="text-slate-400" />
+        {/* Search bar */}
+        <div className="w-full max-w-2xl px-4 sm:px-0">
+          <div
+            className={`flex flex-col sm:flex-row items-center gap-3 sm:gap-2 rounded-3xl sm:rounded-2xl p-3 sm:p-2 shadow-2xl border bg-white overflow-hidden transition-all focus-within:ring-4 ring-indigo-500/20`}
+          >
+            {/* Input Area */}
+            <div className="flex items-center w-full flex-1">
+              <div className="pl-3">
+                <Search size={20} className="text-slate-400" />
+              </div>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Search by contest title..."
+                className="flex-1 text-base bg-transparent border-none outline-none py-2.5 px-3 text-slate-800 placeholder:text-slate-400 w-full"
+              />
             </div>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search by contest title..."
-              className="flex-1 text-base bg-transparent border-none outline-none py-2.5 text-slate-800 placeholder:text-slate-400"
-            />
+
+            {/* Search Button */}
             <button
               onClick={() => handleSearch()}
-              className="px-8 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 shadow-lg bg-[#5b50e8] hover:bg-indigo-500"
+              className="w-full sm:w-auto px-8 py-3.5 sm:py-3 rounded-xl sm:rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 shadow-lg bg-[#5b50e8] hover:bg-indigo-500"
             >
               Search
             </button>
@@ -137,8 +145,8 @@ export default function HeroBanner() {
                   activeCategory === cat
                     ? "bg-indigo-600 border-indigo-500 text-white shadow-xl scale-105"
                     : isDark
-                    ? "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
-                    : "bg-white/10 border-white/10 text-[#d4d0ff] hover:bg-white/20 hover:text-white"
+                      ? "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
+                      : "bg-white/10 border-white/10 text-[#d4d0ff] hover:bg-white/20 hover:text-white"
                 }`}
               >
                 <span>{getIcon(cat)}</span> {cat}
