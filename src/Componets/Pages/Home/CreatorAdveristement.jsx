@@ -42,35 +42,10 @@ const AnimatedNumber = ({ target, suffix = "", prefix = "" }) => {
 };
 
 const STATS = [
-  {
-    value: 284,
-    suffix: "K+",
-    label: "Active Participants",
-    icon: "👥",
-    color: "from-violet-500 to-indigo-500",
-  },
-  {
-    value: 12.8,
-    suffix: "K",
-    label: "Contests Hosted",
-    icon: "🏟️",
-    color: "from-teal-500 to-cyan-500",
-  },
-  {
-    value: 2.4,
-    prefix: "$",
-    suffix: "M",
-    label: "Prizes Awarded",
-    icon: "💵",
-    color: "from-amber-500 to-orange-500",
-  },
-  {
-    value: 98,
-    suffix: "%",
-    label: "Satisfaction Rate",
-    icon: "⭐",
-    color: "from-pink-500 to-rose-500",
-  },
+  { value: 284, suffix: "K+", label: "Active Participants", icon: "👥" },
+  { value: 12.8, suffix: "K", label: "Contests Hosted", icon: "🏟️" },
+  { value: 2.4, prefix: "$", suffix: "M", label: "Prizes Awarded", icon: "💵" },
+  { value: 98, suffix: "%", label: "Satisfaction Rate", icon: "⭐" },
 ];
 
 const FEATURES = [
@@ -98,9 +73,7 @@ const FEATURES = [
 
 const containerVariants = {
   hidden: {},
-  show: {
-    transition: { staggerChildren: 0.12 },
-  },
+  show: { transition: { staggerChildren: 0.12 } },
 };
 
 const itemVariants = {
@@ -114,7 +87,7 @@ const CreatorAdveristement = () => {
 
   return (
     <section
-      className={`w-full transition-colors duration-300 ${isDark ? "bg-[#0f1623]" : "bg-slate-50"}`}
+      className={`w-full transition-colors duration-300 ${isDark ? "bg-[#07090f]" : "bg-slate-50"}`}
     >
       {/* ── Gradient Stats Banner ── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-teal-500 py-20 px-4">
@@ -136,7 +109,6 @@ const CreatorAdveristement = () => {
         />
 
         <div className="relative max-w-5xl mx-auto">
-          {/* Heading */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -152,7 +124,6 @@ const CreatorAdveristement = () => {
             </p>
           </motion.div>
 
-          {/* Stats grid */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -185,8 +156,28 @@ const CreatorAdveristement = () => {
       </div>
 
       {/* ── Features Grid ── */}
-      <div className={`py-20 px-4 ${isDark ? "bg-[#0f1623]" : "bg-white"}`}>
-        <div className="max-w-5xl mx-auto">
+      <div
+        className={`relative overflow-hidden py-20 px-4 transition-colors duration-300 ${
+          isDark ? "bg-[#07090f]" : "bg-white"
+        }`}
+      >
+        {/* Dark mode bg decoration */}
+        {isDark && (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -top-48 -left-48 w-[600px] h-[600px] rounded-full bg-indigo-500/6 blur-[130px]" />
+            <div className="absolute -bottom-48 -right-48 w-[500px] h-[500px] rounded-full bg-teal-500/6 blur-[110px]" />
+            <div
+              className="absolute inset-0 opacity-[0.02]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
+                backgroundSize: "64px 64px",
+              }}
+            />
+          </div>
+        )}
+
+        <div className="relative max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -197,7 +188,7 @@ const CreatorAdveristement = () => {
             <span
               className={`text-xs font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full ${
                 isDark
-                  ? "bg-indigo-900/30 text-indigo-400"
+                  ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
                   : "bg-indigo-50 text-indigo-600"
               }`}
             >
@@ -205,11 +196,11 @@ const CreatorAdveristement = () => {
             </span>
             <h2
               className={`mt-4 text-3xl md:text-4xl font-extrabold tracking-tight ${
-                isDark ? "text-slate-100" : "text-slate-900"
+                isDark ? "text-white" : "text-slate-900"
               }`}
             >
               Everything You Need to{" "}
-              <span className="bg-gradient-to-r from-indigo-500 to-teal-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text text-transparent">
                 Run a Great Contest
               </span>
             </h2>
@@ -233,31 +224,29 @@ const CreatorAdveristement = () => {
                 key={i}
                 variants={itemVariants}
                 whileHover={{ y: -4 }}
-                className={`rounded-2xl p-6 border flex gap-4 items-start cursor-default transition-colors ${
+                className={`rounded-2xl p-6 border flex gap-4 items-start cursor-default transition-all ${
                   isDark
-                    ? "bg-[#161d2e] border-slate-700/60 hover:border-indigo-700/60"
+                    ? "bg-[#0d1118] border-white/5 hover:border-indigo-500/25 shadow-lg shadow-black/40"
                     : "bg-slate-50 border-slate-200 hover:border-indigo-300 shadow-sm"
                 }`}
               >
                 <div
                   className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
-                    isDark ? "bg-indigo-900/30" : "bg-indigo-50"
+                    isDark
+                      ? "bg-indigo-500/10 border border-indigo-500/20"
+                      : "bg-indigo-50"
                   }`}
                 >
                   {f.icon}
                 </div>
                 <div>
                   <h3
-                    className={`font-bold text-base ${
-                      isDark ? "text-slate-100" : "text-slate-900"
-                    }`}
+                    className={`font-bold text-base ${isDark ? "text-white" : "text-slate-900"}`}
                   >
                     {f.title}
                   </h3>
                   <p
-                    className={`text-sm mt-1 leading-relaxed ${
-                      isDark ? "text-slate-400" : "text-slate-500"
-                    }`}
+                    className={`text-sm mt-1 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}
                   >
                     {f.desc}
                   </p>
@@ -266,7 +255,6 @@ const CreatorAdveristement = () => {
             ))}
           </motion.div>
 
-          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -274,7 +262,7 @@ const CreatorAdveristement = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="mt-12 text-center"
           >
-            <button className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-teal-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+            <button className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-teal-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
               Start Your First Contest — It&apos;s Free
             </button>
           </motion.div>

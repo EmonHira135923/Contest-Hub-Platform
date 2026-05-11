@@ -17,13 +17,13 @@ export default function Navvar() {
     { name: "All Contests", href: "/all-contests" },
     { name: "Leaderboard", href: "/leaderboard" },
     { name: "Contest Arena", href: "/contest-arena" },
-    { name: "About", href: "/about" }, // "About Us" থেকে ছোট করে "About" করা হয়েছে
+    { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`transition-all duration-300 ${
         isLight
           ? "bg-white/70 border-b border-black/[0.06] text-slate-700"
           : "bg-[#0a0a14]/75 border-b border-white/[0.05] text-white"
@@ -62,7 +62,7 @@ export default function Navvar() {
           </span>
         </Link>
 
-        {/* Desktop Nav Links - Reduced text size to xs/sm */}
+        {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-0.5">
           {navLinks.map((link) => (
             <Navlink key={link.name} href={link.href} isLight={isLight}>

@@ -6,14 +6,12 @@ import Navvar from "./Navvar";
 
 const Header = () => {
   const pathName = usePathname();
-  if (pathName.startsWith("/auth")) return <></>;
-  if (pathName.startsWith("/dashboard")) return <></>;
+  if (pathName.startsWith("/auth")) return null;
+  if (pathName.startsWith("/dashboard")) return null;
   return (
-    <div>
-      <header>
-        <Navvar />
-      </header>
-    </div>
+    <header className="sticky top-0 z-50">
+      <Navvar />
+    </header>
   );
 };
 
