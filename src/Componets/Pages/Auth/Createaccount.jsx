@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
 import RegisteForm from "@/Componets/Forms/RegisteForm";
+import SocialAccount from "./SocialAccount";
 
 export default function Createaccount() {
   const { theme } = useTheme();
@@ -106,21 +107,7 @@ export default function Createaccount() {
             </span>
           </div>
 
-          {/* Social */}
-          <div className="grid grid-cols-2 gap-3">
-            <button className={socialBtn}>
-              <Image
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                width={18}
-                height={18}
-                alt="Google"
-              />
-              Google
-            </button>
-            <button className={socialBtn}>
-              <FaGithub size={18} /> GitHub
-            </button>
-          </div>
+          <SocialAccount isDark={isDark} />
 
           <p className="text-center text-sm text-slate-500 mt-7">
             Already have an account?{" "}

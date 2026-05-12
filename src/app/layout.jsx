@@ -6,6 +6,7 @@ import Header from "@/Componets/Shared/Header";
 import Footer from "@/Componets/Shared/Footer";
 import ReactQueryProvider from "@/Componets/Provider/ReactQueryProvider";
 import { AuthProvider } from "@/Componets/Provider/AuthContext";
+import NextAuthProvider from "@/Componets/Provider/NextAuthProvider";
 
 const inter = Inter({
   weight: ["100", "200", "400", "600", "700", "800"],
@@ -61,16 +62,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <ReactQueryProvider>
-            <ThemeProvider>
-              <ToastContainer />
-              <Header />
-              {children}
-              <Footer />
-            </ThemeProvider>
-          </ReactQueryProvider>
-        </AuthProvider>
+        <NextAuthProvider>
+          <AuthProvider>
+            <ReactQueryProvider>
+              <ThemeProvider>
+                <ToastContainer />
+                <Header />
+                {children}
+                <Footer />
+              </ThemeProvider>
+            </ReactQueryProvider>
+          </AuthProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
