@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import useTheme from "../utils/hooks/useThemeValue";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Sun, Moon, LayoutDashboard, LogOut } from "lucide-react";
+import { Menu, X, Sun, Moon, LayoutDashboard, LogOut, User } from "lucide-react";
 import Navlink from "./Navlink";
 import useAuth from "../utils/hooks/useAuth";
 
@@ -87,6 +87,9 @@ export default function Navvar() {
                     <div className="p-1.5">
                       <Link href="/dashboard" onClick={() => setIsProfileOpen(false)} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-colors ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}>
                         <LayoutDashboard size={15} /> Dashboard
+                      </Link>
+                      <Link href="/profile" onClick={() => setIsProfileOpen(false)} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-colors ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}>
+                        <User size={15} /> Myprofile
                       </Link>
                       <button onClick={() => { logout(); setIsProfileOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium text-red-500 hover:bg-red-500/10 transition-colors">
                         <LogOut size={15} /> Logout

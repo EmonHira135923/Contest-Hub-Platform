@@ -4,7 +4,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { getUsers } from "../../../lib/dbConnect";
 
 const handler = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET_KEY,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
