@@ -61,12 +61,15 @@ const handler = NextAuth({
         const userCollection = await getUsers();
         const dbUser = await userCollection.findOne({ email: user.email });
 
+        console.log("user", dbUser);
+
         if (dbUser) {
-          token.id = dbUser._id;
+          token.id = dbUser._id.toString();
           token.role = dbUser.role;
           token.phone = dbUser.phone;
-          token.image = dbUser.image; // ক্লাউডিনারি ইমেজটি এখানে সেট হবে
+          token.image = dbUser.image;
           token.provider = dbUser.provider;
+          token.createdAt = dbUser.createdAt;
         }
       }
       return token;
@@ -80,6 +83,7 @@ const handler = NextAuth({
         session.user.phone = token.phone;
         session.user.image = token.image; // আপনার ডাটাবেজের ইমেজটি সেশনে যাবে
         session.user.provider = token.provider;
+        session.user.createdAt = token.createdAt;
       }
       return session;
     },

@@ -13,7 +13,6 @@ import {
   LogIn,
   Copy,
   Check,
-  Building2,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -28,7 +27,7 @@ export default function Profilepage() {
   if (!profile) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(profile._id);
+    navigator.clipboard.writeText(profile?._id || profile?.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -47,7 +46,6 @@ export default function Profilepage() {
   const textPrimary = isDark ? "text-gray-100" : "text-gray-900";
   const textSecondary = isDark ? "text-gray-400" : "text-gray-500";
   const textMuted = isDark ? "text-gray-600" : "text-gray-400";
-  const divider = isDark ? "border-white/[0.06]" : "border-gray-100";
   const sectionLabel = `text-[10.5px] font-semibold uppercase tracking-[0.1em] mb-3 ${isDark ? "text-gray-500" : "text-gray-400"}`;
   const fieldCellBg = isDark ? "bg-[#161b22]" : "bg-white";
   const fieldCellBorder = isDark ? "border-white/[0.06]" : "border-gray-100";
@@ -55,73 +53,70 @@ export default function Profilepage() {
   return (
     <div className={`min-h-screen transition-colors ${bg}`}>
       <div className="max-w-2xl mx-auto px-5 py-10">
-
         {/* ── Top header card ── */}
-        <div className={`rounded-xl border ${cardBorder} ${cardBg} p-5 mb-4`}>
-          <div className="flex items-center gap-4">
-
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <div
-                className={`w-[68px] h-[68px] rounded-lg overflow-hidden flex items-center justify-center text-[22px] font-medium ${
-                  isDark ? "bg-blue-900/60 text-blue-200" : "bg-blue-600 text-white"
-                }`}
-              >
-                {profile.image ? (
-                  <Image
-                    src={profile.image}
-                    alt={profile.name}
-                    width={68}
-                    height={68}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  profile.name?.[0]?.toUpperCase()
-                )}
+        <div className={`rounded-xl border ${cardBorder} ${cardBg} p-6 mb-4`}>
+          {/* Main Layout Container: Vertical on mobile, Horizontal on desktop */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            
+            {/* Top Row for Mobile (Image + Name) */}
+            <div className="flex items-center gap-4 w-full">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0">
+                <div
+                  className={`w-[72px] h-[72px] rounded-lg overflow-hidden flex items-center justify-center text-[24px] font-medium ${
+                    isDark
+                      ? "bg-blue-900/60 text-blue-200"
+                      : "bg-blue-600 text-white"
+                  }`}
+                >
+                  {profile.image ? (
+                    <Image
+                      src={profile.image}
+                      alt={profile.name}
+                      width={72}
+                      height={72}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    profile.name?.[0]?.toUpperCase()
+                  )}
+                </div>
+                <button
+                  className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border shadow-sm transition-transform hover:scale-110 ${
+                    isDark
+                      ? "bg-[#1c2128] border-white/[0.1] text-gray-400"
+                      : "bg-white border-gray-200 text-gray-500"
+                  }`}
+                >
+                  <Camera size={13} />
+                </button>
               </div>
-              <button
-                className={`absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center border shadow-sm transition-transform hover:scale-110 ${
-                  isDark
-                    ? "bg-[#1c2128] border-white/[0.1] text-gray-400"
-                    : "bg-white border-gray-200 text-gray-500"
-                }`}
-              >
-                <Camera size={11} />
-              </button>
-            </div>
 
-            {/* Name + badges */}
-            <div className="flex-1 min-w-0">
-              <h1 className={`text-[19px] font-semibold leading-tight mb-1.5 ${textPrimary}`}>
-                {profile.name}
-              </h1>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded border ${
-                    isDark
-                      ? "bg-blue-950/60 text-blue-300 border-blue-800/50"
-                      : "bg-blue-50 text-blue-700 border-blue-200"
-                  }`}
+              {/* Name + Badges */}
+              <div className="flex-1 min-w-0">
+                <h1
+                  className={`text-[20px] font-bold leading-tight mb-2 ${textPrimary}`}
                 >
-                  <Shield size={10} />
-                  {profile.role}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded border ${
-                    isDark
-                      ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/50"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  }`}
-                >
-                  <Building2 size={10} />
-                  Engineering
-                </span>
+                  {profile.name}
+                </h1>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded border uppercase tracking-wider ${
+                      isDark
+                        ? "bg-blue-950/60 text-blue-300 border-blue-800/50"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
+                    }`}
+                  >
+                    <Shield size={10} />
+                    {profile.role}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Edit button */}
+            {/* Edit button: Full width on mobile, Auto width on desktop */}
             <button
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors flex-shrink-0 ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border text-sm font-semibold transition-colors flex-shrink-0 mt-2 sm:mt-0 ${
                 isDark
                   ? "border-white/[0.08] text-gray-300 hover:bg-white/[0.04]"
                   : "border-gray-200 text-gray-700 hover:bg-gray-50"
@@ -137,13 +132,14 @@ export default function Profilepage() {
         <div className="mb-4">
           <p className={sectionLabel}>Contact information</p>
           <div className={`rounded-xl border ${cardBorder} overflow-hidden`}>
-            <div className={`grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}>
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}
+            >
               <FieldCell
                 label="Email"
                 value={profile.email}
                 icon={<Mail size={13} />}
                 bg={fieldCellBg}
-                border={fieldCellBorder}
                 textPrimary={textPrimary}
                 textMuted={textMuted}
                 isDark={isDark}
@@ -153,7 +149,6 @@ export default function Profilepage() {
                 value={profile.phone || "Not provided"}
                 icon={<Phone size={13} />}
                 bg={fieldCellBg}
-                border={fieldCellBorder}
                 textPrimary={textPrimary}
                 textMuted={textMuted}
                 isDark={isDark}
@@ -166,14 +161,15 @@ export default function Profilepage() {
         <div className="mb-4">
           <p className={sectionLabel}>Account details</p>
           <div className={`rounded-xl border ${cardBorder} overflow-hidden`}>
-            <div className={`grid grid-cols-1 sm:grid-cols-2 divide-y ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}>
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 divide-y ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}
+            >
               <div className={`grid grid-cols-2 divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}>
                 <FieldCell
                   label="Role"
                   value={profile.role}
                   icon={<User size={13} />}
                   bg={fieldCellBg}
-                  border={fieldCellBorder}
                   textPrimary={textPrimary}
                   textMuted={textMuted}
                   isDark={isDark}
@@ -183,7 +179,6 @@ export default function Profilepage() {
                   value={profile.provider}
                   icon={<LogIn size={13} />}
                   bg={fieldCellBg}
-                  border={fieldCellBorder}
                   textPrimary={textPrimary}
                   textMuted={textMuted}
                   isDark={isDark}
@@ -195,7 +190,6 @@ export default function Profilepage() {
                   value={formatDate(profile.createdAt)}
                   icon={<Calendar size={13} />}
                   bg={fieldCellBg}
-                  border={fieldCellBorder}
                   textPrimary={textPrimary}
                   textMuted={textMuted}
                   isDark={isDark}
@@ -204,7 +198,6 @@ export default function Profilepage() {
                   label="Security"
                   icon={<Shield size={13} />}
                   bg={fieldCellBg}
-                  border={fieldCellBorder}
                   textPrimary={textPrimary}
                   textMuted={textMuted}
                   isDark={isDark}
@@ -233,7 +226,7 @@ export default function Profilepage() {
               User ID
             </span>
             <code className={`text-xs font-mono ${textSecondary}`}>
-              {profile._id}
+              {profile?._id || profile?.id}
             </code>
           </div>
           <button
@@ -242,15 +235,14 @@ export default function Profilepage() {
               copied
                 ? "text-emerald-500"
                 : isDark
-                ? "text-blue-400 hover:text-blue-300"
-                : "text-blue-600 hover:text-blue-700"
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-700"
             }`}
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
-
       </div>
     </div>
   );
@@ -259,11 +251,7 @@ export default function Profilepage() {
 function FieldCell({ label, value, icon, custom, bg, textPrimary, textMuted, isDark }) {
   return (
     <div className={`${bg} px-4 py-3.5`}>
-      <div
-        className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] mb-1.5 ${textMuted} ${
-          isDark ? "[&_svg]:text-blue-500" : "[&_svg]:text-blue-500"
-        }`}
-      >
+      <div className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] mb-1.5 ${textMuted} [&_svg]:text-blue-500`}>
         {icon}
         {label}
       </div>

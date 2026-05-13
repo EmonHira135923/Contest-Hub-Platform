@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   
   // NextAuth থেকে সেশন ডাটা আনা
   const { data: session, status } = useSession();
+  
 
   const fetchUser = async () => {
     try {
