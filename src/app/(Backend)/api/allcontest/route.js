@@ -58,6 +58,7 @@ export async function POST(request) {
       tag: body.tag,
       prize: body.prize,
       participants: 0,
+      image,
       deadline: body.deadline,
       joined: "0",
       createdAt: new Date(),

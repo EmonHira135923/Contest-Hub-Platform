@@ -15,6 +15,7 @@ import {
   Check,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Profilepage() {
@@ -57,7 +58,6 @@ export default function Profilepage() {
         <div className={`rounded-xl border ${cardBorder} ${cardBg} p-6 mb-4`}>
           {/* Main Layout Container: Vertical on mobile, Horizontal on desktop */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            
             {/* Top Row for Mobile (Image + Name) */}
             <div className="flex items-center gap-4 w-full">
               {/* Avatar */}
@@ -115,7 +115,8 @@ export default function Profilepage() {
             </div>
 
             {/* Edit button: Full width on mobile, Auto width on desktop */}
-            <button
+            <Link
+              href={`/profile/${profile?.id || profile?._id}`}
               className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border text-sm font-semibold transition-colors flex-shrink-0 mt-2 sm:mt-0 ${
                 isDark
                   ? "border-white/[0.08] text-gray-300 hover:bg-white/[0.04]"
@@ -124,7 +125,7 @@ export default function Profilepage() {
             >
               <Edit2 size={14} />
               Edit profile
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -164,7 +165,9 @@ export default function Profilepage() {
             <div
               className={`grid grid-cols-1 sm:grid-cols-2 divide-y ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}
             >
-              <div className={`grid grid-cols-2 divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}>
+              <div
+                className={`grid grid-cols-2 divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}
+              >
                 <FieldCell
                   label="Role"
                   value={profile.role}
@@ -184,7 +187,9 @@ export default function Profilepage() {
                   isDark={isDark}
                 />
               </div>
-              <div className={`grid grid-cols-2 divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}>
+              <div
+                className={`grid grid-cols-2 divide-x ${isDark ? "divide-white/[0.06]" : "divide-gray-100"}`}
+              >
                 <FieldCell
                   label="Member since"
                   value={formatDate(profile.createdAt)}
@@ -222,7 +227,9 @@ export default function Profilepage() {
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className={`text-[10.5px] font-semibold uppercase tracking-[0.1em] ${textMuted}`}>
+            <span
+              className={`text-[10.5px] font-semibold uppercase tracking-[0.1em] ${textMuted}`}
+            >
               User ID
             </span>
             <code className={`text-xs font-mono ${textSecondary}`}>
@@ -248,10 +255,21 @@ export default function Profilepage() {
   );
 }
 
-function FieldCell({ label, value, icon, custom, bg, textPrimary, textMuted, isDark }) {
+function FieldCell({
+  label,
+  value,
+  icon,
+  custom,
+  bg,
+  textPrimary,
+  textMuted,
+  isDark,
+}) {
   return (
     <div className={`${bg} px-4 py-3.5`}>
-      <div className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] mb-1.5 ${textMuted} [&_svg]:text-blue-500`}>
+      <div
+        className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] mb-1.5 ${textMuted} [&_svg]:text-blue-500`}
+      >
         {icon}
         {label}
       </div>

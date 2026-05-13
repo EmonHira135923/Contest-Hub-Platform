@@ -7,6 +7,7 @@ import Footer from "@/Componets/Shared/Footer";
 import ReactQueryProvider from "@/Componets/Provider/ReactQueryProvider";
 import { AuthProvider } from "@/Componets/Provider/AuthContext";
 import NextAuthProvider from "@/Componets/Provider/NextAuthProvider";
+import { ModalProvider } from "@/Componets/Provider/ModalContext";
 
 const inter = Inter({
   weight: ["100", "200", "400", "600", "700", "800"],
@@ -66,10 +67,12 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <ReactQueryProvider>
               <ThemeProvider>
-                <ToastContainer />
-                <Header />
-                {children}
-                <Footer />
+                <ModalProvider>
+                  <ToastContainer />
+                  <Header />
+                  {children}
+                  <Footer />
+                </ModalProvider>
               </ThemeProvider>
             </ReactQueryProvider>
           </AuthProvider>
