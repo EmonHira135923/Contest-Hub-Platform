@@ -14,6 +14,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import useRole from "../utils/hooks/useRole";
+import useAuth from "../utils/hooks/useAuth";
 
 const NAV = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -28,6 +30,11 @@ const NAV = [
 
 const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
+
+  const role = useRole();
+  const {user} = useAuth();
+
+  // console.log("usrs",role);
 
   // ── color tokens ───────────────────────────────────────────────────────────
   const sidebarBg = isDark
