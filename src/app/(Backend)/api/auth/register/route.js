@@ -1,5 +1,8 @@
 import { getUsers } from "@/app/(Backend)/lib/dbConnect";
+import { verifyAdmin } from "@/app/(Backend)/middlewares/IsAdmin";
+import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 
 export async function POST(request) {
   try {
@@ -10,7 +13,10 @@ export async function POST(request) {
 
     if (!email || !password || !name || !phone) {
       return Response.json(
-        { success: false, message: "Missing name or email or password or phone" },
+        {
+          success: false,
+          message: "Missing name or email or password or phone",
+        },
         { status: 400 },
       );
     }
@@ -61,23 +67,79 @@ export async function GET(request) {
   try {
     const usersCollection = await getUsers();
 
-    // পাসওয়ার্ড ফিল্ডটি বাদ দিয়ে (projection: 0) সব ডাটা আনা হচ্ছে
+    // অথেন্টিকেশন এবং অ্যাডমিন ভেরিফিকেশন (আপনার আগের লজিক)
+    const Token = await verifyToken(request);
+    const admin = await verifyAdmin(request, Token);
+
+    if (!Token) {
+      return Response.json(
+        { success: false, message: "Unauthorized-Access" },
+        { status: 401 }
+      );
+    }
+
+    if (!admin) {
+      return Response.json(
+        { success: false, message: "Forbidden Access" },
+        { status: 403 }
+      );
+    }
+
+    // ১. সার্চ এবং পেজিনেশন প্যারামিটারগুলো ইউআরএল থেকে ধরা
+    const { searchParams } = new URL(request.url);
+    const search = (searchParams.get("search") || "").trim();
+    const page = Math.max(Number.parseInt(searchParams.get("page"), 10) || 1, 1);
+    const limit = Math.max(
+      Number.parseInt(searchParams.get("limit"), 10) || 10,
+      1,
+    );
+    const skip = (page - 1) * limit;
+
+    // ২. সার্চ কুয়েরি তৈরি করা (Name, Email, Role, Phone, Provider, ID)
+    let query = {};
+    if (search) {
+      const searchConditions = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { role: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+        { provider: { $regex: search, $options: "i" } },
+      ];
+
+      if (ObjectId.isValid(search)) {
+        searchConditions.push({ _id: new ObjectId(search) });
+      }
+
+      query = {
+        $or: searchConditions,
+      };
+    }
+
+    // ৩. টোটাল ইউজারের সংখ্যা বের করা (ফ্রন্টএন্ডে পেজ কাউন্ট দেখানোর জন্য)
+    const totalUsers = await usersCollection.countDocuments(query);
+
+    // ৪. ডাটা ফেচ করা (Pagination + Projection)
     const users = await usersCollection
-      .find({}, { projection: { password: 0 } })
+      .find(query, { projection: { password: 0 } })
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Users fetched successfully",
-        data: users,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    return Response.json({
+      success: true,
+      message: "Users fetched successfully",
+      data: users,
+      meta: {
+        totalUsers,
+        currentPage: page,
+        totalPages: Math.ceil(totalUsers / limit),
+        limit,
+      },
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, message: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
+    return Response.json(
+      { success: false, message: error.message },
+      { status: 500 }
     );
   }
 }

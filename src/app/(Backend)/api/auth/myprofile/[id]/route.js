@@ -1,12 +1,22 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getUsers } from "@/app/(Backend)/lib/dbConnect";
+import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 
 export async function PATCH(request, { params }) {
   try {
     const { id } = await params;
     const { phone, image } = await request.json(); // Only allow these fields
     const usersCollection = await getUsers();
+
+    const Token = await verifyToken();
+
+    if (!Token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthoraized-Access" },
+        { status: 401 },
+      );
+    }
 
     const updateFields = {};
     if (phone) updateFields.phone = phone;

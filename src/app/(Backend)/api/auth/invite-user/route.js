@@ -2,10 +2,28 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "@/app/(Backend)/lib/sendEmail";
 import { getInvitationEmailTemplate } from "@/app/(Backend)/lib/genarateTemplate";
+import { verifyAdmin } from "@/app/(Backend)/middlewares/IsAdmin";
+import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 
 export async function POST(req) {
   try {
     const { email, role } = await req.json();
+    const admin = await verifyAdmin();
+    const Token = await verifyToken();
+
+    if (!Token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthoraized-Access" },
+        { status: 401 },
+      );
+    }
+
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden Access" },
+        { status: 403 },
+      );
+    }
 
     if (!email || !role) {
       return NextResponse.json(
@@ -17,7 +35,12 @@ export async function POST(req) {
     const { NEXTAUTH_SECRET_KEY, NEXT_PUBLIC_API_URL, EMAIL_USER, EMAIL_PASS } =
       process.env;
 
-    if (!NEXTAUTH_SECRET_KEY || !NEXT_PUBLIC_API_URL || !EMAIL_USER || !EMAIL_PASS) {
+    if (
+      !NEXTAUTH_SECRET_KEY ||
+      !NEXT_PUBLIC_API_URL ||
+      !EMAIL_USER ||
+      !EMAIL_PASS
+    ) {
       console.error(
         "Invitation API Error: NEXTAUTH_SECRET_KEY, NEXT_PUBLIC_API_URL, EMAIL_USER, and EMAIL_PASS must be configured",
       );
@@ -60,9 +83,6 @@ export async function POST(req) {
         ? "Failed to send invitation email"
         : "Internal Server Error";
 
-    return NextResponse.json(
-      { success: false, message },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }

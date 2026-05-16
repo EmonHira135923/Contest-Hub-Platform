@@ -2,13 +2,23 @@ import { getUsers } from "@/app/(Backend)/lib/dbConnect";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { ObjectId } from "mongodb"; // Import this!
+import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 
 export async function GET(request) {
   try {
     const usersCollection = await getUsers();
 
+    const Token = await verifyToken();
+
+    if (!Token) {
+      return Response.json(
+        { success: false, message: "Unauthoraized-Access" },
+        { status: 401 },
+      );
+    }
+
     // 1. cookie read (Fix: Add await)
-    const cookieStore = await cookies(); 
+    const cookieStore = await cookies();
     const token = cookieStore.get("accessToken")?.value;
 
     console.log("🔥 ACCESS TOKEN FROM COOKIE:", token);
@@ -16,7 +26,7 @@ export async function GET(request) {
     if (!token) {
       return Response.json(
         { success: false, message: "Unauthorized - no token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -28,20 +38,20 @@ export async function GET(request) {
     } catch (err) {
       return Response.json(
         { success: false, message: "Invalid or expired token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // 3. user find (Fix: Wrap ID in ObjectId)
     const user = await usersCollection.findOne({
-      _id: new ObjectId(decoded.id), 
+      _id: new ObjectId(decoded.id),
     });
 
     if (!user) {
       console.log("❌ USER NOT FOUND FOR ID:", decoded.id);
       return Response.json(
         { success: false, message: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -56,13 +66,13 @@ export async function GET(request) {
           _id: user._id.toString(),
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.log("💥 SERVER ERROR:", error.message);
     return Response.json(
       { success: false, message: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

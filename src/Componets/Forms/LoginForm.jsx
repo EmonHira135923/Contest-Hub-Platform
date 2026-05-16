@@ -6,12 +6,15 @@ import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import useAxiosSecure from "../utils/hooks/useAxiosSecure";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import useAuth from "../utils/hooks/useAuth";
 
 const LoginForm = ({ inputClass, isDark }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const axiosSecure = useAxiosSecure();
   const router = useRouter();
+  const { reFetch } = useAuth();
 
   const {
     register,
@@ -24,10 +27,16 @@ const LoginForm = ({ inputClass, isDark }) => {
     try {
       const response = await axiosSecure.post("/api/auth/login", data);
       console.log("Login Success:", response.data);
-      router.push("/dashboard");
+      toast.success("Login successful!");
+      await reFetch();
+      router.replace("/dashboard");
+      router.refresh();
       // Handle success (e.g., save token, redirect to dashboard)
     } catch (error) {
+      const message =
+        error.response?.data?.message || error.message || "Login failed";
       console.error("Login Error:", error.response?.data || error.message);
+      toast.error(message);
       // Handle error (e.g., show a toast notification)
     } finally {
       setLoading(false);

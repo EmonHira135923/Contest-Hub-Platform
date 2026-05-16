@@ -19,11 +19,25 @@ export async function POST(request) {
     }
 
     // 2. find user
-    const user = await userCollection.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user =
+      (await userCollection.findOne({ email: normalizedEmail })) ||
+      (await userCollection.findOne({ email: email.trim() }));
 
     if (!user) {
       return Response.json(
         { success: false, message: "Invalid credentials" },
+        { status: 400 },
+      );
+    }
+
+    if (typeof user.password !== "string" || !user.password) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "This account does not have a password. Please login with Google/GitHub or reset your password.",
+        },
         { status: 400 },
       );
     }
