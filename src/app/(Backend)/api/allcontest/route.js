@@ -1,6 +1,5 @@
 import { getAllContests } from "../../lib/dbConnect";
 
-
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -44,23 +43,24 @@ export async function GET(request) {
   }
 }
 
-// POST → new contest create
 export async function POST(request) {
   try {
     const body = await request.json();
-
     const ContestCollection = await getAllContests();
 
     const newContest = {
       title: body.title,
       description: body.description,
       category: body.category,
-      tag: body.tag,
       prize: body.prize,
-      participants: 0,
-      image,
+      registrationFee: body.registrationFee,
+      instruction: body.instruction,
+      image: body.image, // Cloudinary URL
       deadline: body.deadline,
-      joined: "0",
+      participantsCount: 0,
+      status: "pending", // অ্যাডমিন চেক করার জন্য
+      payment: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
+      creatorEmail: body.creatorEmail,
       createdAt: new Date(),
     };
 
@@ -68,7 +68,7 @@ export async function POST(request) {
 
     return Response.json({
       success: true,
-      message: "Contest created",
+      message: "Contest created successfully",
       id: result.insertedId,
     });
   } catch (error) {

@@ -40,10 +40,16 @@ export default function Navvar() {
     { name: "All Contests", href: "/all-contests" },
     ...(user
       ? [
-          { name: "Leaderboard", href: "/leaderboard" },
-          // শুধুমাত্র 'user' রোলের জন্যই BeACreator লিঙ্কটি দেখাবে
+          // শুধুমাত্র 'user' রোলের জন্য এই লিঙ্কগুলো দেখাবে
           ...(role === "user"
-            ? [{ name: "BeACreator", href: "/be-a-creator" }]
+            ? [
+                { name: "BeACreator", href: "/be-a-creator" },
+                { name: "Leaderboard", href: "/leaderboard" },
+              ]
+            : []),
+          // 'creator' রোলের জন্য এই লিঙ্কটি দেখাবে
+          ...(role === "creator"
+            ? [{ name: "Create-Contest", href: "/create-contest" }]
             : []),
         ]
       : []),

@@ -16,12 +16,6 @@ export default function Createaccount() {
       : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:shadow-[0_0_0_3px_rgba(124,58,237,0.08)]"
   }`;
 
-  const socialBtn = `flex items-center justify-center gap-2.5 py-3 border rounded-xl text-sm font-bold transition-all ${
-    isDark
-      ? "bg-white/[0.05] border-white/[0.08] text-slate-200 hover:bg-white/[0.1] hover:border-violet-500/40"
-      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-violet-400/40 shadow-sm"
-  }`;
-
   return (
     <div
       className={`min-h-screen flex transition-colors duration-300 ${isDark ? "bg-[#0a0a14]" : "bg-[#f4f3ff]"}`}
