@@ -15,6 +15,8 @@ import {
   ClipboardList,
   ShieldCheck,
   CheckCircle2,
+  Shield,
+  User2,
 } from "lucide-react";
 import useRole from "../utils/hooks/useRole";
 import useAuth from "../utils/hooks/useAuth";
@@ -72,6 +74,18 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
           ],
         },
         {
+          label: "Manage Creators",
+          icon: Shield,
+          isGroup: true,
+          children: [
+            {
+              label: "All Creator",
+              icon: User2,
+              href: "/dashboard/manage-creator",
+            },
+          ],
+        },
+        {
           label: "Manage Contests",
           icon: ShieldCheck,
           href: "/dashboard/manage-contests",
@@ -103,6 +117,18 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
     return [
       ...common,
       {
+        label: "Manage Creators",
+        icon: ShieldCheck,
+        isGroup: true,
+        children: [
+          {
+            label: "Be-A-Creator",
+            icon: PlusCircle,
+            href: "/be-a-creator",
+          },
+        ],
+      },
+      {
         label: "My Contests",
         icon: Trophy,
         isGroup: true,
@@ -118,11 +144,6 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
             href: "/dashboard/my-winning",
           },
         ],
-      },
-      {
-        label: "My Profile",
-        icon: User,
-        href: "/dashboard/profile",
       },
     ];
   }, [role]);
