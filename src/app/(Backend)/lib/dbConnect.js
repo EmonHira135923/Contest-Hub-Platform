@@ -33,3 +33,8 @@ export const getUsers = async () => {
   const database = await connectDB();
   return database.collection("User");
 };
+
+export const getCreator = async () => {
+  const database = await connectDB();
+  return database.collection("Creator");
+};

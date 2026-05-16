@@ -5,11 +5,7 @@ import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 
 export async function PATCH(request, { params }) {
   try {
-    const { id } = await params;
-    const { phone, image } = await request.json(); // Only allow these fields
-    const usersCollection = await getUsers();
-
-    const Token = await verifyToken();
+    const Token = await verifyToken(request);
 
     if (!Token) {
       return NextResponse.json(
@@ -18,6 +14,9 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    const { id } = await params;
+    const { phone, image } = await request.json(); // Only allow these fields
+    const usersCollection = await getUsers();
     const updateFields = {};
     if (phone) updateFields.phone = phone;
     if (image) updateFields.image = image;
