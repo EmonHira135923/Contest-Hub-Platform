@@ -1,10 +1,18 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Search, Users, ShieldCheck, Pencil, X } from "lucide-react";
+import {
+  Search,
+  Users,
+  ShieldCheck,
+  Pencil,
+  X,
+  Eye,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "react-toastify";
-import UserTable from "@/Componets/Cards/UserTable";
-import Pagination from "@/Componets/Shared/Pagination";
 import UserTableSkeleton from "@/Componets/Skeltons/UserTableSkeleton";
 import useAxiosSecure from "@/Componets/utils/hooks/useAxiosSecure";
 import useUsers from "@/Componets/utils/hooks/useAlluser";
@@ -16,9 +24,7 @@ const roleOptions = ["user", "creator", "admin"];
 const formatDate = (value) => {
   if (!value) return "N/A";
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "N/A";
-
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -28,15 +34,40 @@ const formatDate = (value) => {
 const getInitials = (name) =>
   (name || "?")
     .split(" ")
-    .map((word) => word[0])
+    .map((w) => w[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+const roleBadge = (role) => {
+  const map = {
+    admin: "bg-violet-100 text-violet-700 dark-admin",
+    creator: "bg-amber-100 text-amber-700",
+    user: "bg-slate-100 text-slate-500",
+  };
+  return map[role] || map.user;
+};
+
+// ── Inline role badge colours for dark mode via inline style trick ──
+const roleBadgeStyle = (role, isDark) => {
+  if (isDark) {
+    if (role === "admin")
+      return { background: "rgba(139,92,246,0.18)", color: "#c4b5fd" };
+    if (role === "creator")
+      return { background: "rgba(251,191,36,0.15)", color: "#fcd34d" };
+    return { background: "rgba(255,255,255,0.06)", color: "#94a3b8" };
+  }
+  if (role === "admin") return { background: "#ede9fe", color: "#6d28d9" };
+  if (role === "creator") return { background: "#fef3c7", color: "#92400e" };
+  return { background: "#f1f5f9", color: "#64748b" };
+};
 
 const Alluser = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const axiosSecure = useAxiosSecure();
+  const { user } = useAuth();
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modalType, setModalType] = useState(null);
@@ -44,7 +75,6 @@ const Alluser = () => {
   const [roleValue, setRoleValue] = useState("user");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const limit = 10;
-  const {user} = useAuth();
 
   const { users, meta, isLoading, refetch } = useUsers(search, page, limit);
 
@@ -59,12 +89,11 @@ const Alluser = () => {
     setPage(1);
   };
 
-  const openModal = (type, user) => {
-    setSelectedUser(user);
+  const openModal = (type, u) => {
+    setSelectedUser(u);
     setModalType(type);
-    setRoleValue(user?.role || "user");
+    setRoleValue(u?.role || "user");
   };
-
   const closeModal = (force = false) => {
     if (isSubmitting && !force) return;
     setModalType(null);
@@ -74,29 +103,23 @@ const Alluser = () => {
 
   const handleRoleUpdate = async () => {
     if (!selectedUser) return;
-
-    // ১. অ্যাডমিন যাতে নিজের রোল পরিবর্তন করতে না পারে সেই চেক
     if (user?.email === selectedUser?.email) {
       toast.error("You cannot change your own role!");
       return;
     }
-
     try {
       setIsSubmitting(true);
       const res = await axiosSecure.patch(
         `/api/auth/register/users/${selectedUser._id}`,
         { role: roleValue },
       );
-
       if (res.data?.success) {
-        toast.success(res.data?.message || "User role updated successfully");
+        toast.success(res.data?.message || "Role updated");
         await refetch();
         closeModal(true);
       }
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to update user role",
-      );
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to update role");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,32 +127,37 @@ const Alluser = () => {
 
   const handleDelete = async () => {
     if (!selectedUser || selectedUser.role === "admin") return;
-
     try {
       setIsSubmitting(true);
       const res = await axiosSecure.delete(
         `/api/auth/register/users/${selectedUser._id}`,
       );
-
       toast.success(res.data?.message || "User deleted");
-      if (users.length === 1 && page > 1) {
-        setPage(page - 1);
-      } else {
-        await refetch();
-      }
+      if (users.length === 1 && page > 1) setPage(page - 1);
+      else await refetch();
       closeModal(true);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete user");
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to delete");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const stats = [
-    { label: "Total users", value: totalUsers, Icon: Users },
-    { label: "Current page", value: currentPage, Icon: ShieldCheck },
-    { label: "Total pages", value: totalPages, Icon: Pencil },
-  ];
+  // ── Colours ──────────────────────────────────────────────────────────
+  const bg = isDark ? "bg-[#0a0a0a]" : "bg-slate-50";
+  const card = isDark
+    ? "bg-[#111] border border-[#1e1e1e]"
+    : "bg-white border border-slate-100 shadow-sm";
+  const txt = isDark ? "text-white" : "text-slate-900";
+  const muted = isDark ? "text-slate-500" : "text-slate-400";
+  const inputCls = isDark
+    ? "bg-[#111] border-[#1e1e1e] text-white placeholder:text-slate-600 focus:border-violet-500"
+    : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-violet-400";
+  const divider = isDark ? "border-[#1e1e1e]" : "border-slate-100";
+
+  const accentIcon = isDark
+    ? "bg-violet-900/40 text-violet-400"
+    : "bg-gradient-to-br from-violet-600 to-pink-500 text-white";
 
   const details = selectedUser
     ? [
@@ -139,90 +167,62 @@ const Alluser = () => {
         ["Phone", selectedUser.phone || "N/A"],
         ["Role", selectedUser.role || "user"],
         ["Provider", selectedUser.provider || "Email"],
-        ["Image", selectedUser.image || "N/A"],
         ["Created", formatDate(selectedUser.createdAt)],
         ["Updated", formatDate(selectedUser.updatedAt)],
       ]
     : [];
 
   return (
-    <div
-      className={`p-6 min-h-screen transition-colors ${
-        isDark
-          ? "bg-[#0a0a0a] text-white"
-          : "bg-gradient-to-br from-slate-50 via-fuchsia-50/40 to-violet-50/40 text-slate-900"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className={`p-4 sm:p-6 min-h-screen ${bg} ${txt} transition-colors`}>
+      <div className="max-w-7xl mx-auto space-y-4">
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">All Users</h1>
-            <p
-              className={`text-sm mt-0.5 ${
-                isDark ? "text-slate-500" : "text-slate-500"
-              }`}
-            >
+            <h1 className="text-lg font-semibold tracking-tight">All Users</h1>
+            <p className={`text-xs mt-0.5 ${muted}`}>
               Manage permissions and view all registered users
             </p>
           </div>
-
-          <div className="relative w-full md:w-72">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
             <Search
-              className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                isDark ? "text-slate-500" : "text-fuchsia-400"
-              }`}
-              size={15}
+              className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? "text-slate-500" : "text-violet-400"}`}
+              size={14}
             />
             <input
               type="text"
               value={search}
               onChange={handleSearch}
-              placeholder="Search name, email, role..."
-              className={`w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border outline-none transition-all ${
-                isDark
-                  ? "bg-[#111] border-[#1e1e1e] text-white placeholder:text-slate-600 focus:ring-2 focus:ring-[#C6EB71]/30 focus:border-[#C6EB71]"
-                  : "bg-white border-fuchsia-100 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-400"
-              }`}
+              placeholder="Search name, email, role…"
+              className={`w-full pl-9 pr-3 py-2 text-sm rounded-xl border outline-none transition-all ${inputCls}`}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          {stats.map(({ label, value, Icon }) => (
+        {/* ── Stats — horizontal compact row ─────────────────────── */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {[
+            { label: "Total users", value: totalUsers, Icon: Users },
+            { label: "Current page", value: currentPage, Icon: ShieldCheck },
+            { label: "Total pages", value: totalPages, Icon: Pencil },
+          ].map(({ label, value, Icon }) => (
             <div
               key={label}
-              className={`rounded-xl px-4 py-3.5 flex items-center gap-3 ${
-                isDark
-                  ? "bg-[#111] border border-[#1e1e1e]"
-                  : "bg-white/90 border border-fuchsia-100 shadow-sm shadow-fuchsia-100/60"
-              }`}
+              className={`rounded-xl px-3 py-3 flex items-center gap-2.5 ${card}`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  isDark
-                    ? "bg-[#002B36]"
-                    : "bg-gradient-to-br from-violet-600 to-pink-500"
-                }`}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${accentIcon}`}
               >
-                <Icon
-                  size={16}
-                  className={isDark ? "text-[#C6EB71]" : "text-white"}
-                />
+                <Icon size={15} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p
-                  className={`text-xs font-semibold uppercase tracking-wide ${
-                    isDark ? "text-slate-500" : "text-slate-400"
-                  }`}
+                  className={`text-[10px] font-medium uppercase tracking-wide truncate ${muted}`}
                 >
                   {label}
                 </p>
                 <p
-                  className={`text-xl font-bold ${
-                    isDark
-                      ? "text-[#C6EB71]"
-                      : "bg-gradient-to-r from-violet-700 to-pink-600 bg-clip-text text-transparent"
-                  }`}
+                  className={`text-lg font-bold leading-none mt-0.5 ${isDark ? "text-violet-400" : "text-violet-600"}`}
                 >
                   {value}
                 </p>
@@ -231,106 +231,284 @@ const Alluser = () => {
           ))}
         </div>
 
+        {/* ── Table ──────────────────────────────────────────────── */}
         <div
-          className={`rounded-2xl overflow-hidden border ${
-            isDark ? "border-[#1e1e1e]" : "border-fuchsia-100 bg-white/80"
-          }`}
+          className={`rounded-2xl overflow-hidden border ${isDark ? "border-[#1e1e1e]" : "border-slate-100"}`}
         >
-          <table className="w-full border-collapse table-fixed">
-            <colgroup>
-              <col className="w-12" />
-              <col className="w-[38%]" />
-              <col className="w-[18%]" />
-              <col className="w-[18%]" />
-              <col className="w-[22%]" />
-            </colgroup>
-            <thead>
-              <tr
-                className={`text-[11px] font-bold uppercase tracking-wider ${
-                  isDark
-                    ? "bg-[#111] text-slate-600"
-                    : "bg-gradient-to-r from-violet-50 to-pink-50 text-fuchsia-500"
-                }`}
-              >
-                <th className="px-4 py-3.5 text-left">#</th>
-                <th className="px-4 py-3.5 text-left">User details</th>
-                <th className="px-4 py-3.5 text-left">Role</th>
-                <th className="px-4 py-3.5 text-left">Provider</th>
-                <th className="px-4 py-3.5 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            {isLoading ? (
-              <UserTableSkeleton isDark={isDark} />
-            ) : users.length > 0 ? (
-              <UserTable
-                users={users}
-                page={page}
-                limit={limit}
-                isDark={isDark}
-                onView={(user) => openModal("view", user)}
-                onEdit={(user) => openModal("edit", user)}
-                onDelete={(user) => openModal("delete", user)}
-              />
-            ) : (
-              <tbody>
-                <tr>
-                  <td
-                    colSpan={5}
-                    className={`px-4 py-20 text-center text-sm ${
-                      isDark ? "text-slate-600" : "text-slate-400"
-                    }`}
-                  >
-                    No users found.
-                  </td>
+          {/* Desktop table — hidden on mobile */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr
+                  className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? "bg-[#111] text-slate-500" : "bg-violet-50 text-violet-500"}`}
+                >
+                  <th className="px-4 py-3 text-left w-10">#</th>
+                  <th className="px-4 py-3 text-left">User</th>
+                  <th className="px-4 py-3 text-left w-24">Role</th>
+                  <th className="px-4 py-3 text-left w-24">Provider</th>
+                  <th className="px-4 py-3 text-right w-28">Actions</th>
                 </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5}>
+                      <div className="py-8 text-center text-sm text-slate-400">
+                        Loading…
+                      </div>
+                    </td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className={`py-16 text-center text-sm ${muted}`}
+                    >
+                      No users found.
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((u, i) => (
+                    <tr
+                      key={u._id}
+                      className={`border-t transition-colors ${divider} ${isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/60"}`}
+                    >
+                      <td className={`px-4 py-3 text-xs ${muted}`}>
+                        {(page - 1) * limit + i + 1}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold flex-shrink-0 relative overflow-hidden ${isDark ? "bg-violet-900/40 text-violet-300" : "bg-violet-100 text-violet-700"}`}
+                          >
+                            {u.image ? (
+                              <Image
+                                src={u.image}
+                                alt={u.name || "user"}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              getInitials(u.name)
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate max-w-[180px]">
+                              {u.name || "—"}
+                            </p>
+                            <p
+                              className={`text-xs truncate max-w-[180px] ${muted}`}
+                            >
+                              {u.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                          style={roleBadgeStyle(u.role, isDark)}
+                        >
+                          {(u.role || "user").toUpperCase()}
+                        </span>
+                      </td>
+                      <td className={`px-4 py-3 text-xs ${muted}`}>
+                        {u.provider || "Email"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <ActionBtn
+                            icon={Eye}
+                            onClick={() => openModal("view", u)}
+                            isDark={isDark}
+                            color="blue"
+                            title="View"
+                          />
+                          <ActionBtn
+                            icon={Pencil}
+                            onClick={() => openModal("edit", u)}
+                            isDark={isDark}
+                            color="violet"
+                            title="Edit"
+                          />
+                          <ActionBtn
+                            icon={Trash2}
+                            onClick={() => openModal("delete", u)}
+                            isDark={isDark}
+                            color="red"
+                            title="Delete"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
+            </table>
+          </div>
+
+          {/* Mobile card list — shown only on mobile */}
+          <div
+            className="sm:hidden divide-y"
+            style={{ borderColor: isDark ? "#1e1e1e" : "#f1f5f9" }}
+          >
+            {isLoading ? (
+              <div className="py-10 text-center text-sm text-slate-400">
+                Loading…
+              </div>
+            ) : users.length === 0 ? (
+              <div className={`py-14 text-center text-sm ${muted}`}>
+                No users found.
+              </div>
+            ) : (
+              users.map((u, i) => (
+                <div
+                  key={u._id}
+                  className={`px-4 py-3.5 ${isDark ? "bg-[#111]" : "bg-white"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold flex-shrink-0 relative overflow-hidden ${isDark ? "bg-violet-900/40 text-violet-300" : "bg-violet-100 text-violet-700"}`}
+                    >
+                      {u.image ? (
+                        <Image
+                          src={u.image}
+                          alt={u.name || "user"}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        getInitials(u.name)
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium truncate">
+                          {u.name || "—"}
+                        </p>
+                        <span
+                          className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
+                          style={roleBadgeStyle(u.role, isDark)}
+                        >
+                          {(u.role || "user").toUpperCase()}
+                        </span>
+                      </div>
+                      <p className={`text-xs truncate mt-0.5 ${muted}`}>
+                        {u.email}
+                      </p>
+                      <p className={`text-[10px] mt-0.5 ${muted}`}>
+                        {u.provider || "Email"}
+                      </p>
+                    </div>
+
+                    {/* Actions — vertical pill */}
+                    <div className={`flex flex-col gap-1.5 flex-shrink-0`}>
+                      <ActionBtn
+                        icon={Eye}
+                        onClick={() => openModal("view", u)}
+                        isDark={isDark}
+                        color="blue"
+                        title="View"
+                      />
+                      <ActionBtn
+                        icon={Pencil}
+                        onClick={() => openModal("edit", u)}
+                        isDark={isDark}
+                        color="violet"
+                        title="Edit"
+                      />
+                      <ActionBtn
+                        icon={Trash2}
+                        onClick={() => openModal("delete", u)}
+                        isDark={isDark}
+                        color="red"
+                        title="Delete"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
-          </table>
+          </div>
         </div>
 
-        <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p
-            className={`text-xs ${
-              isDark ? "text-slate-600" : "text-slate-500"
-            }`}
-          >
-            Showing {showingFrom}-{showingTo} of {totalUsers} users
+        {/* ── Pagination ─────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className={`text-xs ${muted}`}>
+            Showing {showingFrom}–{showingTo} of {totalUsers} users
           </p>
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            setPage={setPage}
-            isDark={isDark}
-          />
+          <div className="flex items-center gap-1.5">
+            <PageBtn
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              isDark={isDark}
+            >
+              <ChevronLeft size={15} />
+            </PageBtn>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(
+                (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+              )
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && arr[idx - 1] !== p - 1) acc.push("…");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((item, idx) =>
+                item === "…" ? (
+                  <span
+                    key={`dot-${idx}`}
+                    className={`w-8 text-center text-xs ${muted}`}
+                  >
+                    …
+                  </span>
+                ) : (
+                  <PageBtn
+                    key={item}
+                    onClick={() => setPage(item)}
+                    active={item === page}
+                    isDark={isDark}
+                  >
+                    {item}
+                  </PageBtn>
+                ),
+              )}
+            <PageBtn
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              isDark={isDark}
+            >
+              <ChevronRight size={15} />
+            </PageBtn>
+          </div>
         </div>
       </div>
 
+      {/* ── Modal ──────────────────────────────────────────────────── */}
       {modalType && selectedUser && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-sm px-0 sm:px-4">
           <div
-            className={`w-full max-w-2xl overflow-hidden rounded-2xl border shadow-2xl ${
-              isDark
-                ? "bg-[#13131f] border-white/[0.08]"
-                : "bg-white border-fuchsia-100"
-            }`}
+            className={`w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl border overflow-hidden shadow-2xl ${isDark ? "bg-[#13131f] border-white/[0.08]" : "bg-white border-slate-100"}`}
           >
-            <div
-              className={`h-1 ${
-                isDark
-                  ? "bg-gradient-to-r from-[#C6EB71] to-cyan-400"
-                  : "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500"
-              }`}
-            />
-            <div className="p-6">
-              <div className="flex items-start justify-between gap-4">
+            {/* colour bar */}
+            <div className="h-1 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500" />
+
+            {/* drag handle (mobile) */}
+            <div className="flex justify-center pt-3 sm:hidden">
+              <div
+                className={`w-10 h-1 rounded-full ${isDark ? "bg-white/10" : "bg-slate-200"}`}
+              />
+            </div>
+
+            <div className="p-5 sm:p-6">
+              {/* Modal header */}
+              <div className="flex items-center justify-between gap-3 mb-5">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl text-sm font-black ${
-                      isDark
-                        ? "bg-[#C6EB71]/15 text-[#C6EB71]"
-                        : "bg-gradient-to-br from-violet-100 to-pink-100 text-fuchsia-700"
-                    }`}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold relative overflow-hidden flex-shrink-0 ${isDark ? "bg-violet-900/40 text-violet-300" : "bg-violet-100 text-violet-700"}`}
                   >
                     {selectedUser.image ? (
                       <Image
@@ -344,53 +522,39 @@ const Alluser = () => {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-lg font-black tracking-tight">
+                    <h2 className="text-base font-semibold">
                       {modalType === "view" && "User details"}
-                      {modalType === "edit" && "Update user role"}
+                      {modalType === "edit" && "Update role"}
                       {modalType === "delete" && "Delete user"}
                     </h2>
-                    <p
-                      className={`text-sm ${
-                        isDark ? "text-slate-500" : "text-slate-500"
-                      }`}
-                    >
+                    <p className={`text-xs ${muted}`}>
                       {selectedUser.name || selectedUser.email}
                     </p>
                   </div>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => closeModal()}
-                  className={`rounded-xl p-2 transition-colors ${
-                    isDark
-                      ? "text-slate-500 hover:bg-white/5 hover:text-white"
-                      : "text-slate-400 hover:bg-fuchsia-50 hover:text-fuchsia-600"
-                  }`}
+                  className={`rounded-xl p-2 transition-colors ${isDark ? "text-slate-500 hover:bg-white/5" : "text-slate-400 hover:bg-slate-100"}`}
                 >
-                  <X size={18} />
+                  <X size={17} />
                 </button>
               </div>
 
+              {/* View */}
               {modalType === "view" && (
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto pr-0.5">
                   {details.map(([label, value]) => (
                     <div
                       key={label}
-                      className={`rounded-xl border px-4 py-3 ${
-                        isDark
-                          ? "border-white/[0.06] bg-white/[0.03]"
-                          : "border-fuchsia-100 bg-fuchsia-50/35"
-                      }`}
+                      className={`rounded-xl px-3 py-2.5 border ${isDark ? "border-white/[0.06] bg-white/[0.03]" : "border-slate-100 bg-slate-50"}`}
                     >
                       <p
-                        className={`text-[10px] font-bold uppercase tracking-[0.16em] ${
-                          isDark ? "text-slate-500" : "text-fuchsia-400"
-                        }`}
+                        className={`text-[10px] font-semibold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-violet-400"}`}
                       >
                         {label}
                       </p>
-                      <p className="mt-1 break-words text-sm font-semibold">
+                      <p className="mt-0.5 text-sm font-medium break-all">
                         {value}
                       </p>
                     </div>
@@ -398,36 +562,38 @@ const Alluser = () => {
                 </div>
               )}
 
+              {/* Edit */}
               {modalType === "edit" && (
-                <div className="mt-6 space-y-4">
-                  <label
-                    className={`block text-[10px] font-bold uppercase tracking-[0.16em] ${
-                      isDark ? "text-slate-500" : "text-fuchsia-400"
-                    }`}
-                  >
-                    Role
-                  </label>
-                  <select
-                    value={roleValue}
-                    onChange={(e) => setRoleValue(e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm font-bold outline-none transition-colors ${
-                      isDark
-                        ? "bg-[#111] border-[#1e1e1e] text-white focus:border-[#C6EB71]"
-                        : "bg-white border-fuchsia-100 text-slate-900 focus:border-fuchsia-400"
-                    }`}
-                  >
+                <div className="space-y-3">
+                  <p className={`text-xs ${muted}`}>
+                    Select a new role for{" "}
+                    <strong>{selectedUser.name || selectedUser.email}</strong>
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
                     {roleOptions.map((role) => (
-                      <option key={role} value={role}>
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => setRoleValue(role)}
+                        className={`py-2.5 rounded-xl text-sm font-semibold border transition-all capitalize ${
+                          roleValue === role
+                            ? "bg-violet-600 text-white border-violet-600"
+                            : isDark
+                              ? "border-white/10 text-slate-400 hover:bg-white/5"
+                              : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                        }`}
+                      >
                         {role}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               )}
 
+              {/* Delete */}
               {modalType === "delete" && (
                 <div
-                  className={`mt-6 rounded-xl border px-4 py-4 ${
+                  className={`rounded-xl border px-4 py-3.5 ${
                     selectedUser.role === "admin"
                       ? "border-amber-200 bg-amber-50 text-amber-800"
                       : isDark
@@ -435,7 +601,7 @@ const Alluser = () => {
                         : "border-rose-100 bg-rose-50 text-rose-700"
                   }`}
                 >
-                  <p className="text-sm font-semibold">
+                  <p className="text-sm font-medium">
                     {selectedUser.role === "admin"
                       ? "Admin accounts cannot be deleted."
                       : `Are you sure you want to delete ${selectedUser.name || selectedUser.email}?`}
@@ -443,43 +609,34 @@ const Alluser = () => {
                 </div>
               )}
 
-              <div className="mt-6 flex justify-end gap-3">
+              {/* Footer buttons */}
+              <div className="flex gap-2 mt-5">
                 <button
                   type="button"
                   onClick={() => closeModal()}
                   disabled={isSubmitting}
-                  className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-colors disabled:opacity-50 ${
-                    isDark
-                      ? "border-white/[0.08] bg-white/[0.04] text-white/60 hover:bg-white/[0.08]"
-                      : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                  }`}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors disabled:opacity-50 ${isDark ? "border-white/10 text-white/60 hover:bg-white/5" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
                 >
                   Cancel
                 </button>
-
                 {modalType === "edit" && (
                   <button
                     type="button"
                     onClick={handleRoleUpdate}
                     disabled={isSubmitting}
-                    className={`rounded-xl px-5 py-2.5 text-sm font-black text-white transition-opacity disabled:opacity-50 ${
-                      isDark
-                        ? "bg-gradient-to-r from-violet-600 to-indigo-600"
-                        : "bg-gradient-to-r from-violet-600 to-pink-500"
-                    }`}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-50 transition-colors"
                   >
-                    {isSubmitting ? "Saving..." : "Save role"}
+                    {isSubmitting ? "Saving…" : "Save role"}
                   </button>
                 )}
-
                 {modalType === "delete" && (
                   <button
                     type="button"
                     onClick={handleDelete}
                     disabled={isSubmitting || selectedUser.role === "admin"}
-                    className="rounded-xl bg-gradient-to-r from-rose-600 to-red-500 px-5 py-2.5 text-sm font-black text-white transition-opacity disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 disabled:opacity-40 transition-colors"
                   >
-                    {isSubmitting ? "Deleting..." : "Delete user"}
+                    {isSubmitting ? "Deleting…" : "Delete"}
                   </button>
                 )}
               </div>
@@ -490,5 +647,54 @@ const Alluser = () => {
     </div>
   );
 };
+
+// ── Reusable tiny icon button ─────────────────────────────────────────
+const colorMap = {
+  blue: {
+    dark: "text-blue-400 hover:bg-blue-500/10",
+    light: "text-blue-500 hover:bg-blue-50",
+  },
+  violet: {
+    dark: "text-violet-400 hover:bg-violet-500/10",
+    light: "text-violet-600 hover:bg-violet-50",
+  },
+  red: {
+    dark: "text-rose-400 hover:bg-rose-500/10",
+    light: "text-rose-500 hover:bg-rose-50",
+  },
+};
+
+const ActionBtn = ({ icon: Icon, onClick, isDark, color, title }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    title={title}
+    aria-label={title}
+    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isDark ? colorMap[color].dark : colorMap[color].light}`}
+  >
+    <Icon size={14} />
+  </button>
+);
+
+const PageBtn = ({ children, onClick, disabled, active, isDark }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={[
+      "w-8 h-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all",
+      active
+        ? "bg-violet-600 text-white"
+        : disabled
+          ? "opacity-30 cursor-not-allowed " +
+            (isDark ? "text-slate-500" : "text-slate-400")
+          : isDark
+            ? "text-slate-400 hover:bg-white/5"
+            : "text-slate-500 hover:bg-slate-100",
+    ].join(" ")}
+  >
+    {children}
+  </button>
+);
 
 export default Alluser;
