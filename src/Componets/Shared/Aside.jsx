@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -9,212 +9,268 @@ import {
   Trophy,
   FileText,
   Settings,
-  Wallet,
-  BarChart3,
   Users,
-  X,
+  ChevronDown,
+  PlusCircle,
+  ClipboardList,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import useRole from "../utils/hooks/useRole";
 import useAuth from "../utils/hooks/useAuth";
 
-const NAV = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Contests", icon: Trophy, href: "/dashboard/contests" },
-  { label: "My Profile", icon: User, href: "/dashboard/profile" },
-  { label: "Reports", icon: BarChart3, href: "/dashboard/reports" },
-  { label: "Documents", icon: FileText, href: "/dashboard/documents" },
-  { label: "Members", icon: Users, href: "/dashboard/members" },
-  { label: "Wallet", icon: Wallet, href: "/dashboard/wallet" },
-  { label: "Settings", icon: Settings, href: "/dashboard/settings" },
-];
-
 const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
-
   const role = useRole();
-  const {user} = useAuth();
+  const { user } = useAuth();
+  const [openMenus, setOpenMenus] = useState({});
 
-  // console.log("usrs",role);
+  const toggleSubMenu = (label) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
-  // ── color tokens ───────────────────────────────────────────────────────────
+  const navItems = useMemo(() => {
+    if (!role) {
+      return [
+        {
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          href: "/dashboard",
+        },
+      ];
+    }
+
+    const common = [
+      {
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        href: "/dashboard",
+      },
+    ];
+
+    if (role === "admin") {
+      return [
+        ...common,
+        {
+          label: "Manage Users",
+          icon: Users,
+          isGroup: true,
+          children: [
+            {
+              label: "All Members",
+              icon: Users,
+              href: "/dashboard/manage-users",
+            },
+            {
+              label: "Add Member",
+              icon: PlusCircle,
+              href: "/dashboard/add-user",
+            },
+          ],
+        },
+        {
+          label: "Manage Contests",
+          icon: ShieldCheck,
+          href: "/dashboard/manage-contests",
+        },
+      ];
+    }
+
+    if (role === "creator") {
+      return [
+        ...common,
+        {
+          label: "Add Contest",
+          icon: PlusCircle,
+          href: "/dashboard/add-contest",
+        },
+        {
+          label: "My Created",
+          icon: ClipboardList,
+          href: "/dashboard/my-created",
+        },
+        {
+          label: "Submitted Tasks",
+          icon: FileText,
+          href: "/dashboard/submitted-tasks",
+        },
+      ];
+    }
+
+    return [
+      ...common,
+      {
+        label: "My Contests",
+        icon: Trophy,
+        isGroup: true,
+        children: [
+          {
+            label: "Participated",
+            icon: CheckCircle2,
+            href: "/dashboard/my-participated",
+          },
+          {
+            label: "Winning Contests",
+            icon: Trophy,
+            href: "/dashboard/my-winning",
+          },
+        ],
+      },
+      {
+        label: "My Profile",
+        icon: User,
+        href: "/dashboard/profile",
+      },
+    ];
+  }, [role]);
+
   const sidebarBg = isDark
     ? "bg-[#0f0f0f] border-r border-white/[0.07]"
     : "bg-[#fafafa] border-r border-gray-200";
 
-  const logoText = isDark ? "text-gray-100" : "text-gray-900";
-  const menuLabel = isDark ? "text-white/20" : "text-gray-400";
-
   const activeLink = isDark
-    ? "bg-[#c8f53a]/10 text-[#c8f53a] font-semibold"
-    : "bg-[#b5e318]/15 text-[#5a7a00] font-semibold";
+    ? "bg-[#c8f53a]/10 text-[#c8f53a]"
+    : "bg-[#b5e318]/15 text-[#5a7a00]";
 
   const inactiveLink = isDark
     ? "text-white/40 hover:text-white/80 hover:bg-white/[0.05]"
     : "text-gray-500 hover:text-gray-800 hover:bg-gray-100";
 
-  const activeIcon = isDark ? "text-[#c8f53a]" : "text-[#6a9200]";
-  const inactiveIcon = isDark
-    ? "text-white/30 group-hover:text-white/60"
-    : "text-gray-400 group-hover:text-gray-600";
+  const NavLinkItem = ({ item, isSubItem = false }) => {
+    const Icon = item.icon;
+    const isExpanded = openMenus[item.label];
+    const active = item.href ? pathname === item.href : false;
 
-  const tooltipBg = isDark
-    ? "bg-[#1a1a1a] border-white/10 text-white"
-    : "bg-gray-900 border-gray-700 text-white";
+    if (item.isGroup) {
+      return (
+        <div className="mb-1">
+          <button
+            type="button"
+            onClick={() => toggleSubMenu(item.label)}
+            className={`w-full flex items-center rounded-2xl text-[13.5px] transition-all ${inactiveLink}
+            ${
+              collapsed
+                ? "justify-between px-2 py-3"
+                : "justify-between px-3 py-3"
+            }`}
+          >
+            <div
+              className={`flex items-center gap-3 ${
+                collapsed ? "justify-center flex-1" : ""
+              }`}
+            >
+              <Icon size={19} className="flex-shrink-0" />
+              {!collapsed && <span>{item.label}</span>}
+            </div>
 
-  // ── sidebar inner content ──────────────────────────────────────────────────
-  const SidebarContent = () => (
+            <ChevronDown
+              size={14}
+              className={`transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {isExpanded && (
+            <div className={`mt-1 space-y-1 ${collapsed ? "ml-0" : "ml-4"}`}>
+              {item.children.map((child) => (
+                <NavLinkItem key={child.href} item={child} isSubItem={true} />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (item.href) {
+      return (
+        <Link
+          href={item.href}
+          onClick={() => setMobileOpen && setMobileOpen(false)}
+          className={`flex items-center gap-3 px-3 rounded-2xl text-[13.5px] transition-all duration-150 group relative
+          ${active ? activeLink : inactiveLink}
+          ${collapsed ? "justify-center py-3" : "py-3"}
+          ${isSubItem ? "py-2" : ""}
+          `}
+        >
+          <Icon size={isSubItem ? 17 : 19} className="flex-shrink-0" />
+
+          {!collapsed && <span>{item.label}</span>}
+
+          {collapsed && (
+            <span className="absolute left-full ml-3 px-2 py-1 rounded-lg text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-gray-900 text-white whitespace-nowrap">
+              {item.label}
+            </span>
+          )}
+        </Link>
+      );
+    }
+
+    return null;
+  };
+
+  return (
     <div
-      className={`${sidebarBg} flex flex-col h-full transition-all duration-300 ${collapsed ? "w-[68px]" : "w-[220px]"}`}
+      className={`${sidebarBg} flex flex-col h-screen overflow-hidden shrink-0 transition-all duration-300 ${
+        collapsed ? "w-[68px]" : "w-[240px]"
+      }`}
     >
-      {/* Logo */}
       <div
-        className={`flex items-center gap-3 px-4 py-5 ${collapsed ? "justify-center" : ""}`}
+        className={`flex items-center gap-3 px-4 py-5 ${
+          collapsed ? "justify-center" : ""
+        }`}
       >
         <div className="relative w-9 h-9 flex-shrink-0">
           <Image
             src="/Logo.png"
-            alt="ContestHub"
+            alt="Logo"
             fill
             className="object-contain rounded-xl"
           />
         </div>
+
         {!collapsed && (
-          <span className={`font-black tracking-tight text-[17px] ${logoText}`}>
+          <span
+            className={`font-black tracking-tight text-[17px] ${
+              isDark ? "text-white" : "text-black"
+            }`}
+          >
             ContestHub
           </span>
         )}
-        {/* Mobile close button */}
-        {mobileOpen && (
-          <button
-            onClick={() => setMobileOpen(false)}
-            className={`ml-auto p-1 rounded-lg ${isDark ? "text-white/40 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"}`}
-          >
-            <X size={18} />
-          </button>
-        )}
       </div>
 
-      {/* Menu label */}
-      {!collapsed && (
-        <p
-          className={`px-5 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase ${menuLabel}`}
-        >
-          Menu
-        </p>
-      )}
+      <nav className="flex-1 min-h-0 px-2 space-y-1 overflow-hidden">
+        {!role && !collapsed && (
+          <div className="px-4 py-2 animate-pulse text-xs text-gray-400">
+            Loading menu...
+          </div>
+        )}
 
-      {/* Nav */}
-      <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ label, icon: Icon, href }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen && setMobileOpen(false)}
-              title={collapsed ? label : undefined}
-              className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-[13.5px] transition-all duration-150 group relative
-                ${active ? activeLink : inactiveLink}
-                ${collapsed ? "justify-center" : ""}
-              `}
-            >
-              <Icon
-                size={19}
-                className={`flex-shrink-0 transition-colors ${active ? activeIcon : inactiveIcon}`}
-              />
-              {!collapsed && <span>{label}</span>}
+        {!collapsed && role && (
+          <p className="px-4 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
+            Menu
+          </p>
+        )}
 
-              {/* Tooltip when collapsed */}
-              {collapsed && (
-                <span
-                  className={`absolute left-full ml-3 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 shadow-xl z-50 border ${tooltipBg}`}
-                >
-                  {label}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+        {navItems.map((item) => (
+          <NavLinkItem key={item.label} item={item} />
+        ))}
       </nav>
 
-      <div className="h-5" />
-    </div>
-  );
-
-  return (
-    <>
-      {/* ── Desktop sidebar ── */}
-      <div className="hidden lg:flex h-full flex-shrink-0">
-        <SidebarContent />
+      <div className="px-2 pb-4">
+        <NavLinkItem
+          item={{
+            label: "Settings",
+            icon: Settings,
+            href: "/dashboard/settings",
+          }}
+        />
       </div>
-
-      {/* ── Mobile overlay ── */}
-      {mobileOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
-          <div className="fixed top-0 left-0 h-full z-50 lg:hidden shadow-2xl">
-            <div className={`${sidebarBg} flex flex-col h-full w-[260px]`}>
-              {/* Logo + close */}
-              <div className="flex items-center gap-3 px-4 py-5">
-                <div className="relative w-9 h-9 flex-shrink-0">
-                  <Image
-                    src="/Logo.png"
-                    alt="ContestHub"
-                    fill
-                    className="object-contain rounded-xl"
-                  />
-                </div>
-                <span
-                  className={`font-black tracking-tight text-[17px] ${logoText}`}
-                >
-                  ContestHub
-                </span>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className={`ml-auto p-1.5 rounded-xl ${isDark ? "text-white/40 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"}`}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <p
-                className={`px-5 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase ${menuLabel}`}
-              >
-                Menu
-              </p>
-
-              <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
-                {NAV.map(({ label, icon: Icon, href }) => {
-                  const active = pathname === href;
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-[13.5px] transition-all duration-150 group
-                        ${active ? activeLink : inactiveLink}
-                      `}
-                    >
-                      <Icon
-                        size={19}
-                        className={`flex-shrink-0 ${active ? activeIcon : inactiveIcon}`}
-                      />
-                      <span>{label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="h-5" />
-            </div>
-          </div>
-        </>
-      )}
-    </>
+    </div>
   );
 };
 

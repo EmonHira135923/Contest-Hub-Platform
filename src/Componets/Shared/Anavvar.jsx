@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import useAuth from "../utils/hooks/useAuth";
 import {
-  LayoutDashboard,
   User,
   Bell,
   ChevronLeft,
@@ -13,6 +12,7 @@ import {
   Moon,
   Sun,
   ChevronDown,
+  Home,
 } from "lucide-react";
 
 const Anavvar = ({
@@ -152,15 +152,15 @@ const Anavvar = ({
               {/* Links */}
               <div className="p-2">
                 <Link
-                  href="/dashboard"
+                  href="/"
                   onClick={() => setDropOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 ${dropItem}`}
                 >
-                  <LayoutDashboard size={15} />
-                  Dashboard
+                  <Home size={15} />
+                  Home
                 </Link>
                 <Link
-                  href="/dashboard/profile"
+                  href="/profile"
                   onClick={() => setDropOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 ${dropItem}`}
                 >
