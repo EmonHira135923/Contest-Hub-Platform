@@ -22,7 +22,7 @@ const SocialAccount = ({ isDark }) => {
 
       const res = await signIn(provider, {
         redirect: false, // আমরা ম্যানুয়ালি রিডাইরেক্ট করবো
-        callbackUrl: "/",
+        callbackUrl: "/dashboard",
       });
 
       if (res?.error) {
