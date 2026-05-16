@@ -19,7 +19,7 @@ const DashboardLayoutClient = ({ children }) => {
 
   return (
     <div
-      className={`flex h-screen overflow-hidden ${pageBg} transition-colors duration-300`}
+      className={`flex h-screen w-full overflow-hidden ${pageBg} transition-colors duration-300`}
     >
       {/* ── Sidebar (desktop: inline | mobile: overlay inside Aside) ── */}
       <Aside
@@ -42,7 +42,7 @@ const DashboardLayoutClient = ({ children }) => {
 
         {/* Page content */}
         <main
-          className={`flex-1 overflow-y-auto p-4 lg:p-6 transition-colors duration-300 ${contentText}`}
+          className={`flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 transition-colors duration-300 ${contentText}`}
         >
           {children}
         </main>

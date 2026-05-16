@@ -213,64 +213,76 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
   };
 
   return (
-    <div
-      className={`${sidebarBg} flex flex-col h-screen overflow-hidden shrink-0 transition-all duration-300 ${
-        collapsed ? "w-[68px]" : "w-[240px]"
-      }`}
-    >
+    <>
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       <div
-        className={`flex items-center gap-3 px-4 py-5 ${
-          collapsed ? "justify-center" : ""
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 lg:static lg:translate-x-0 transform transition-transform duration-300 ease-in-out
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        ${sidebarBg} flex flex-col h-screen overflow-hidden shrink-0
+        ${collapsed ? "w-[68px]" : "w-[240px]"}
+        `}
       >
-        <div className="relative w-9 h-9 flex-shrink-0">
-          <Image
-            src="/Logo.png"
-            alt="Logo"
-            fill
-            className="object-contain rounded-xl"
-          />
+        <div
+          className={`flex items-center gap-3 px-4 py-5 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
+          <div className="relative w-9 h-9 flex-shrink-0">
+            <Image
+              src="/Logo.png"
+              alt="Logo"
+              fill
+              className="object-contain rounded-xl"
+            />
+          </div>
+
+          {!collapsed && (
+            <span
+              className={`font-black tracking-tight text-[17px] ${
+                isDark ? "text-white" : "text-black"
+              }`}
+            >
+              ContestHub
+            </span>
+          )}
         </div>
 
-        {!collapsed && (
-          <span
-            className={`font-black tracking-tight text-[17px] ${
-              isDark ? "text-white" : "text-black"
-            }`}
-          >
-            ContestHub
-          </span>
-        )}
+        <nav className="flex-1 min-h-0 px-2 space-y-1 overflow-y-auto">
+          {!role && !collapsed && (
+            <div className="px-4 py-2 animate-pulse text-xs text-gray-400">
+              Loading menu...
+            </div>
+          )}
+
+          {!collapsed && role && (
+            <p className="px-4 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
+              Menu
+            </p>
+          )}
+
+          {navItems.map((item) => (
+            <NavLinkItem key={item.label} item={item} />
+          ))}
+        </nav>
+
+        <div className="px-2 pb-4">
+          <NavLinkItem
+            item={{
+              label: "Settings",
+              icon: Settings,
+              href: "/dashboard/settings",
+            }}
+          />
+        </div>
       </div>
-
-      <nav className="flex-1 min-h-0 px-2 space-y-1 overflow-hidden">
-        {!role && !collapsed && (
-          <div className="px-4 py-2 animate-pulse text-xs text-gray-400">
-            Loading menu...
-          </div>
-        )}
-
-        {!collapsed && role && (
-          <p className="px-4 mb-2 text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
-            Menu
-          </p>
-        )}
-
-        {navItems.map((item) => (
-          <NavLinkItem key={item.label} item={item} />
-        ))}
-      </nav>
-
-      <div className="px-2 pb-4">
-        <NavLinkItem
-          item={{
-            label: "Settings",
-            icon: Settings,
-            href: "/dashboard/settings",
-          }}
-        />
-      </div>
-    </div>
+    </>
   );
 };
 
