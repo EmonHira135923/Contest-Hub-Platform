@@ -5,22 +5,30 @@ import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 
 export async function PATCH(request, { params }) {
   try {
+    // ১. টোকেন ভেরিফিকেশন
     const Token = await verifyToken(request);
 
     if (!Token) {
       return NextResponse.json(
-        { success: false, message: "Unauthoraized-Access" },
+        { success: false, message: "Unauthorized-Access" },
         { status: 401 },
       );
     }
 
     const { id } = await params;
-    const { phone, image } = await request.json(); // Only allow these fields
+
+    // ২. রিকোয়েস্ট বডি থেকে ডাটা নেওয়া
+    const { name, phone, image } = await request.json();
+
     const usersCollection = await getUsers();
     const updateFields = {};
+
+    // ৩. শুধুমাত্র পাঠানো ফিল্ডগুলো আপডেট অবজেক্টে যোগ করা
+    if (name) updateFields.name = name;
     if (phone) updateFields.phone = phone;
     if (image) updateFields.image = image;
 
+    // যদি কোনো ডাটাই না পাঠানো হয়
     if (Object.keys(updateFields).length === 0) {
       return NextResponse.json(
         { message: "Nothing to update" },
@@ -28,6 +36,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    // ৪. ডাটাবেস আপডেট
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(id) },
       { $set: updateFields },
@@ -38,10 +47,12 @@ export async function PATCH(request, { params }) {
     }
 
     return NextResponse.json({
+      success: true,
       message: "Profile updated successfully",
-      updateFields,
+      updatedData: updateFields,
     });
   } catch (error) {
+    console.error("Update Error:", error);
     return NextResponse.json(
       { message: "Update failed", error: error.message },
       { status: 500 },
