@@ -46,6 +46,7 @@ export async function PATCH(request) {
         success: true,
         message: "Payment already processed",
         trackingId: newTrackingId,
+        transactionId: existingPayment.transactionId,
       });
     }
 
@@ -93,7 +94,6 @@ export async function PATCH(request) {
         success: true,
         message: "Payment confirmed & tracking started",
         trackingId: newTrackingId,
-        transactionId: session.payment_intent,
         data: result,
       },
       { status: 200 },
