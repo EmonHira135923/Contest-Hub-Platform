@@ -51,12 +51,12 @@ export async function POST(req) {
       },
 
       // ৫. ডাইনামিক সাকসেস ইউআরএল পাথ রিডাইরেকশন
-      success_url: `${appUrl}/all-contests/${body.contestId}?session_id={CHECKOUT_SESSION_ID}&trackingId=${finalTrackingId}`,
-      cancel_url: `${appUrl}/all-contests/${body.contestId}`,
+      success_url: `${appUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}&trackingId=${finalTrackingId}`,
+      cancel_url: `${appUrl}/payment/cancel`,
     });
 
     console.log(
-      `Checkout Session Created for Contest [${body.title}] with Tracking ID:`,
+      `Checkout Session Created for Contest [${body}] with Tracking ID:`,
       finalTrackingId,
     );
 
