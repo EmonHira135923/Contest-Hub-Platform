@@ -1,15 +1,15 @@
 import useAxiosSecure from "./useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 
-const useAllContests = (search = "", category = "") => {
+const useAllContests = (search = "", category = "", page = 1) => {
   const axiosSecure = useAxiosSecure();
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["contests", search, category],
+    queryKey: ["contests", search, category, page],
     queryFn: async () => {
-      // আপনার API এখন Response.json({ success, data, categories }) রিটার্ন করে
+      // আপনার API এখন Response.json({ success, data, categories, totalPages, page }) রিটার্ন করে
       const res = await axiosSecure.get(
-        `api/allcontest?q=${search}&category=${category}`,
+        `api/allcontest?q=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&page=${page}`,
       );
       return res.data;
     },
@@ -18,6 +18,9 @@ const useAllContests = (search = "", category = "") => {
   return {
     contests: data?.data || [],
     categories: data?.categories || [], // API থেকে আসা ইউনিক ক্যাটাগরি
+    totalPages: data?.totalPages || 1,
+    currentPage: data?.page || page,
+    totalCount: data?.totalCount || 0,
     isLoading,
     refetch,
   };

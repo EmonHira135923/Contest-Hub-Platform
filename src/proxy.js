@@ -2,7 +2,13 @@ import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 
 const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET_KEY || "");
-const privateRoutes = ["/leaderboard", "/dashboard", "/profile"];
+const privateRoutes = [
+  "/leaderboard",
+  "/dashboard",
+  "/profile",
+  "/all-contests/",
+  "/payment/",
+];
 
 const clearCustomAuthCookies = (response) => {
   response.cookies.delete("accessToken");
@@ -66,6 +72,8 @@ export const config = {
     "/leaderboard/:path*",
     "/dashboard/:path*",
     "/profile/:path*",
+    "/all-contests/:path*",
+    "/payment/:path*",
     "/auth/:path*",
   ],
 };

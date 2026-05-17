@@ -55,7 +55,7 @@ const CreateContestPage = () => {
       };
 
       // ৩. axiosSecure ব্যবহার করে API কল
-      const response = await axiosSecure.post("/api/all-contests", contestData);
+      const response = await axiosSecure.post("/api/allcontest", contestData);
 
       if (response.data.success) {
         toast.success("Contest Created Successfully!");

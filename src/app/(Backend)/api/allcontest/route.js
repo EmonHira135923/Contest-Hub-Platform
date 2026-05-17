@@ -11,13 +11,17 @@ export async function GET(request) {
     // ১. ডাইনামিক ক্যাটাগরি
     const uniqueCategories = await ContestCollection.distinct("category");
 
-    // ২. ফিল্টার লজিক
+    // ২. পেজ ও লিমিট
+    const page = Math.max(Number(searchParams.get("page") || 1), 1);
+    const limit = Math.max(Number(searchParams.get("limit") || 10), 1);
+    const skip = (page - 1) * limit;
+
+    // ৩. ফিল্টার লজিক
     let filter = {};
     if (searchQuery) {
       filter.title = { $regex: searchQuery, $options: "i" };
     }
 
-    // categoryQuery যদি খালি না থাকে এবং "all" না হয়
     if (
       categoryQuery &&
       categoryQuery.trim() !== "" &&
@@ -26,11 +30,23 @@ export async function GET(request) {
       filter.category = { $regex: new RegExp(`^${categoryQuery}$`, "i") };
     }
 
-    const contests = await ContestCollection.find(filter).toArray();
+    const totalCount = await ContestCollection.countDocuments(filter);
+    const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
+
+    const contests = await ContestCollection
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
 
     return Response.json({
       success: true,
       count: contests.length,
+      totalCount,
+      page,
+      limit,
+      totalPages,
       categories: uniqueCategories,
       data: contests,
     });
@@ -62,6 +78,7 @@ export async function POST(request) {
       payment: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
       creatorEmail: body.creatorEmail,
       createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     const result = await ContestCollection.insertOne(newContest);

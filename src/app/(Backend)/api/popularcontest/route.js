@@ -6,7 +6,7 @@ export async function GET(request) {
 
     // participants অনুযায়ী সর্ট (High to Low) এবং লিমিট ৬
     const result = await ContestCollection.find()
-      .sort({ participants: -1 }) // -1 মানে ডিসেন্ডিং অর্ডার (বেশি থেকে কম)
+      .sort({ participantsCount: -1 }) // -1 মানে ডিসেন্ডিং অর্ডার (বেশি থেকে কম)
       .limit(6)
       .toArray();
 

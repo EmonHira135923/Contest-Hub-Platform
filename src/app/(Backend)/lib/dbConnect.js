@@ -38,3 +38,13 @@ export const getCreator = async () => {
   const database = await connectDB();
   return database.collection("Creator");
 };
+
+export const getPayments = async () => {
+  const database = await connectDB();
+  return database.collection("Payment");
+};
+
+export const getTracking = async () => {
+  const database = await connectDB();
+  return database.collection("Tracking");
+};

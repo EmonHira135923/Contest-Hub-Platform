@@ -1,70 +1,285 @@
-import { Calendar, Users, Trophy, ArrowUpRight } from "lucide-react";
+"use client";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Calendar,
+  Users,
+  Trophy,
+  ArrowUpRight,
+  DollarSign,
+  CreditCard,
+} from "lucide-react";
 
 const ContestCard = ({ contest, isDark }) => {
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (!contest?.deadline) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    const difference = +new Date(contest.deadline) - +new Date();
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  });
+
+  const [isClosed, setIsClosed] = useState(
+    contest?.deadline ? new Date(contest.deadline) < new Date() : false,
+  );
+
+  const isPaid = contest?.payment === "paid";
+
+  // ⏰ লাইভ কাউন্টডাউন লজিক
+  useEffect(() => {
+    if (!contest?.deadline) return;
+
+    const calculateTimeLeft = () => {
+      const difference = +new Date(contest.deadline) - +new Date();
+
+      if (difference <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
+
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    };
+
+    const timer = setInterval(() => {
+      const difference = +new Date(contest.deadline) - +new Date();
+      if (difference <= 0) {
+        setIsClosed(true);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [contest?.deadline]);
+
+  const formatTime = (time) => String(time).padStart(2, "0");
+
+  const formatCategory = (slug) => {
+    if (!slug) return "";
+    return slug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // 💳 Stripe পেমেন্ট গেটওয়েতে পাঠানোর হ্যান্ডলার
+
+  const timeBoxStyle = `flex flex-col items-center justify-center w-12 h-14 rounded-xl font-bold ${
+    isDark ? "bg-indigo-600/20 text-indigo-400" : "bg-indigo-600 text-white"
+  }`;
+
   return (
-    <div className={`group relative rounded-3xl border p-5 transition-all duration-300 hover:shadow-2xl ${
-      isDark 
-      ? "bg-[#11111a] border-white/5 hover:border-indigo-500/50" 
-      : "bg-white border-slate-100 hover:border-indigo-200"
-    }`}>
-      {/* Category Badge & Prize */}
-      <div className="flex justify-between items-start mb-4">
-        <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-          isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600"
-        }`}>
-          {contest.category}
-        </span>
-        <div className="flex items-center gap-1.5 text-amber-500 font-bold">
-          <Trophy size={16} />
-          <span>{contest.prize}</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="space-y-3">
-        <h3 className={`text-xl font-bold leading-tight group-hover:text-indigo-500 transition-colors ${
-          isDark ? "text-white" : "text-slate-800"
-        }`}>
-          {contest.title}
-        </h3>
-        <p className={`text-sm line-clamp-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-          {contest.description}
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className={`my-6 flex items-center justify-between border-y py-4 ${
-        isDark ? "border-white/5" : "border-slate-50"
-      }`}>
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Users size={14} />
-            Participants
+    <div
+      className={`group relative rounded-3xl border p-5 transition-all duration-300 hover:shadow-2xl flex flex-col justify-between ${
+        isDark
+          ? "bg-[#11111a] border-white/5 hover:border-indigo-500/50"
+          : "bg-white border-slate-100 hover:border-indigo-200"
+      }`}
+    >
+      <div>
+        {/* 🖼️ Contest Banner Image */}
+        {contest?.image && (
+          <div className="w-full h-44 rounded-2xl overflow-hidden mb-4 relative bg-gray-700">
+            <Image
+              src={contest.image}
+              alt={contest.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+            />
           </div>
-          <span className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-            {contest.joined}+
-          </span>
-        </div>
-        <div className="flex flex-col gap-1 items-end">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Calendar size={14} />
-            Deadline
+        )}
+
+        {/* 🕒 লাইভ কাউন্টডাউন UI */}
+        {contest?.deadline && (
+          <div className="mb-5 text-center">
+            <p
+              className={`text-xs font-semibold mb-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            >
+              {isClosed ? "Contest Closed" : "Contest closes in"}
+            </p>
+            {!isClosed && (
+              <div className="flex gap-2 justify-center items-center">
+                <div className={timeBoxStyle}>
+                  <span className="text-lg">{formatTime(timeLeft.days)}</span>
+                  <span className="text-[8px] uppercase tracking-wider opacity-80">
+                    Days
+                  </span>
+                </div>
+                <div className={timeBoxStyle}>
+                  <span className="text-lg">{formatTime(timeLeft.hours)}</span>
+                  <span className="text-[8px] uppercase tracking-wider opacity-80">
+                    Hrs
+                  </span>
+                </div>
+                <div className={timeBoxStyle}>
+                  <span className="text-lg">
+                    {formatTime(timeLeft.minutes)}
+                  </span>
+                  <span className="text-[8px] uppercase tracking-wider opacity-80">
+                    Min
+                  </span>
+                </div>
+                <div className={timeBoxStyle}>
+                  <span className="text-lg">
+                    {formatTime(timeLeft.seconds)}
+                  </span>
+                  <span className="text-[8px] uppercase tracking-wider opacity-80">
+                    Sec
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-          <span className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}>
-            {new Date(contest.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
+        )}
+
+        {/* Category Badge & Prize */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <span
+              className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                isDark
+                  ? "bg-indigo-500/10 text-indigo-400"
+                  : "bg-indigo-50 text-indigo-600"
+              }`}
+            >
+              {formatCategory(contest?.category)}
+            </span>
+            {isPaid && (
+              <span className="ml-2 inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-400">
+                Paid
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-amber-500 font-bold">
+            <Trophy size={16} />
+            <span>${contest?.prize?.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-3">
+          <h3
+            className={`text-xl font-bold leading-tight group-hover:text-indigo-500 transition-colors ${
+              isDark ? "text-white" : "text-slate-800"
+            }`}
+          >
+            {contest?.title}
+          </h3>
+          <p
+            className={`text-sm line-clamp-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+          >
+            {contest?.description}
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div
+          className={`my-6 flex items-center justify-between border-y py-4 ${isDark ? "border-white/5" : "border-slate-50"}`}
+        >
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Users size={14} />
+              Participants
+            </div>
+            <span
+              className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}
+            >
+              {contest?.participantsCount || 0} Joined
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1 items-center">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <DollarSign size={14} />
+              Entry Fee
+            </div>
+            <span
+              className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}
+            >
+              {contest?.registrationFee === 0
+                ? "Free"
+                : `$${contest?.registrationFee}`}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1 items-end">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Calendar size={14} />
+              Deadline
+            </div>
+            <span
+              className={`text-sm font-bold ${isDark ? "text-slate-200" : "text-slate-700"}`}
+            >
+              {contest?.deadline
+                ? new Date(contest.deadline).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "N/A"}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Action Button */}
-      <button className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-        isDark 
-        ? "bg-white/5 text-white hover:bg-indigo-600" 
-        : "bg-slate-100 text-slate-800 hover:bg-[#5b50e8] hover:text-white"
-      }`}>
-        View Details
-        <ArrowUpRight size={16} />
-      </button>
+      {/* 🔘 Action Buttons */}
+      <div className="flex items-center gap-3 mt-2">
+        <Link
+          href={`/all-contests/${contest?._id}`}
+          className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all border ${
+            isDark
+              ? "bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20"
+              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+          }`}
+        >
+          View Details
+          <ArrowUpRight size={14} />
+        </Link>
+
+        {isPaid ? (
+          <button
+            disabled
+            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-emerald-500/10 text-emerald-200 cursor-not-allowed"
+          >
+            Paid
+          </button>
+        ) : isClosed ? (
+          <button
+            disabled
+            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
+          >
+            Closed
+          </button>
+        ) : (
+          <Link
+            href={`/payment/${contest?._id}`}
+            className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+              isDark
+                ? "bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-900/20"
+                : "bg-[#5b50e8] text-white hover:bg-[#4a3fd4] shadow-indigo-200"
+            }`}
+          >
+            Join Now
+            <CreditCard size={14} />
+          </Link>
+        )}
+      </div>
     </div>
   );
 };
