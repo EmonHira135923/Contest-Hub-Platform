@@ -1,8 +1,17 @@
 import { getAllContests } from "../../lib/dbConnect";
-
+import { verifyCreator } from "../../middlewares/IsCreator";
+import { verifyToken } from "../../middlewares/verifyToken";
 
 export async function GET(request) {
   try {
+    const isUser = await verifyToken(request);
+    if (!isUser) {
+      return Response.json(
+        { success: false, message: "Unauthorized: Invalid credentials" },
+        { status: 401 },
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("q") || "";
     const categoryQuery = searchParams.get("category") || "";
@@ -62,6 +71,26 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const isUser = await verifyToken(request);
+    const isCreator = await verifyCreator(request);
+
+    if (!isUser) {
+      return Response.json(
+        { success: false, message: "Unauthorized: Invalid credentials" },
+        { status: 401 },
+      );
+    }
+
+    if (!isCreator) {
+      return Response.json(
+        {
+          success: false,
+          message: "Forbidden: Only creators can create contests",
+        },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const ContestCollection = await getAllContests();
 
