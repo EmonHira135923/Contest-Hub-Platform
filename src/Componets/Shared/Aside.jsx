@@ -88,7 +88,14 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
         {
           label: "Manage Contests",
           icon: ShieldCheck,
-          href: "/dashboard/manage-contests",
+          isGroup:true,
+          children:[
+            {
+              label:"All Contest",
+              icon: FileText,
+              href: "/dashboard/manage-contests",
+            }
+          ]
         },
       ];
     }
