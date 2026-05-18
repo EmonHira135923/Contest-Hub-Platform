@@ -1,5 +1,6 @@
 import { getAllContests } from "../../lib/dbConnect";
 
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -8,16 +9,17 @@ export async function GET(request) {
 
     const ContestCollection = await getAllContests();
 
-    // ১. ডাইনামিক ক্যাটাগরি
     const uniqueCategories = await ContestCollection.distinct("category");
 
-    // ২. পেজ ও লিমিট
     const page = Math.max(Number(searchParams.get("page") || 1), 1);
     const limit = Math.max(Number(searchParams.get("limit") || 10), 1);
     const skip = (page - 1) * limit;
 
-    // ৩. ফিল্টার লজিক
-    let filter = {};
+    // default filter -> শুধু approved contest
+    let filter = {
+      adminStatus: "approved",
+    };
+
     if (searchQuery) {
       filter.title = { $regex: searchQuery, $options: "i" };
     }
@@ -33,8 +35,7 @@ export async function GET(request) {
     const totalCount = await ContestCollection.countDocuments(filter);
     const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
 
-    const contests = await ContestCollection
-      .find(filter)
+    const contests = await ContestCollection.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -51,7 +52,7 @@ export async function GET(request) {
       data: contests,
     });
   } catch (error) {
-    console.error("API Error:", error); // এটি আপনার সার্ভার কনসোলে এরর দেখাবে
+    console.error("API Error:", error);
     return Response.json(
       { success: false, message: error.message },
       { status: 500 },
@@ -74,11 +75,11 @@ export async function POST(request) {
       image: body.image, // Cloudinary URL
       deadline: body.deadline,
       participantsCount: 0,
-      status: "pending", // অ্যাডমিন চেক করার জন্য
-      payment: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
+      adminStatus: "pending", // অ্যাডমিন চেক করার জন্য
+      payment: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
       creatorEmail: body.creatorEmail,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     const result = await ContestCollection.insertOne(newContest);

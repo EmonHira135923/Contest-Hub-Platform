@@ -4,9 +4,8 @@ export async function GET(request) {
   try {
     const ContestCollection = await getAllContests();
 
-    // participants অনুযায়ী সর্ট (High to Low) এবং লিমিট ৬
-    const result = await ContestCollection.find()
-      .sort({ participantsCount: -1 }) // -1 মানে ডিসেন্ডিং অর্ডার (বেশি থেকে কম)
+    const result = await ContestCollection.find({ adminStatus: "approved" })
+      .sort({ participantsCount: -1 })
       .limit(6)
       .toArray();
 
@@ -17,7 +16,7 @@ export async function GET(request) {
   } catch (error) {
     return Response.json(
       { success: false, message: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
