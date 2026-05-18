@@ -1,50 +1,33 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getUsers } from "@/app/(Backend)/lib/dbConnect";
-import { verifyAdmin } from "@/app/(Backend)/middlewares/IsAdmin";
 import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
+import { verifyAdmin } from "@/app/(Backend)/middlewares/IsAdmin";
 
-const allowedRoles = ["admin", "creator", "user"];
-
-const getObjectId = (id) => {
+const toObjectId = (id) => {
   if (!ObjectId.isValid(id)) return null;
   return new ObjectId(id);
 };
 
-const authorizeAdmin = async (request) => {
-  const token = await verifyToken(request);
-
-  if (!token) {
-    return {
-      response: NextResponse.json(
-        { success: false, message: "Unauthorized-Access" },
-        { status: 401 },
-      ),
-    };
-  }
-
-  const admin = await verifyAdmin(request, token);
-
-  if (!admin) {
-    return {
-      response: NextResponse.json(
-        { success: false, message: "Forbidden Access" },
-        { status: 403 },
-      ),
-    };
-  }
-
-  return { token, admin };
-};
-
 export async function GET(request, { params }) {
   try {
-    const auth = await authorizeAdmin(request);
-    if (auth.response) return auth.response;
+    const userAuth = await verifyToken(request);
+    if (!userAuth) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
 
-    const { id } = await params;
-    const objectId = getObjectId(id);
+    const admin = await verifyAdmin(request);
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Admin only access" },
+        { status: 403 },
+      );
+    }
 
+    const objectId = toObjectId(params.id);
     if (!objectId) {
       return NextResponse.json(
         { success: false, message: "Invalid user id" },
@@ -53,6 +36,7 @@ export async function GET(request, { params }) {
     }
 
     const usersCollection = await getUsers();
+
     const user = await usersCollection.findOne(
       { _id: objectId },
       { projection: { password: 0 } },
@@ -65,7 +49,10 @@ export async function GET(request, { params }) {
       );
     }
 
-    return NextResponse.json({ success: true, data: user });
+    return NextResponse.json({
+      success: true,
+      data: { ...user, _id: user._id.toString() },
+    });
   } catch (error) {
     return NextResponse.json(
       { success: false, message: error.message },
@@ -76,17 +63,22 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-    // ১. অ্যাডমিন অথোরাইজেশন চেক
-    const auth = await authorizeAdmin(request);
-    if (auth.response) return auth.response;
+    const userAuth = await verifyToken(request);
+    if (!userAuth) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+    const admin = await verifyAdmin(request);
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Admin only access" },
+        { status: 403 },
+      );
+    }
 
-    // auth অবজেক্ট থেকে বর্তমানে লগইন করা অ্যাডমিনের তথ্য নেওয়া (আপনার auth লজিক অনুযায়ী)
-    // সাধারণত authorizeAdmin বা verifyToken থেকে ইউজারের আইডি পাওয়া যায়
-    const currentAdminId = auth?.user?.id || auth?.id;
-
-    const { id } = await params;
-    const objectId = getObjectId(id);
-
+    const objectId = toObjectId(params.id);
     if (!objectId) {
       return NextResponse.json(
         { success: false, message: "Invalid user id" },
@@ -94,18 +86,8 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    // ২. চেক: অ্যাডমিন কি নিজের আইডি এডিট করার চেষ্টা করছে?
-    if (currentAdminId && currentAdminId.toString() === objectId.toString()) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Security Alert: You cannot change your own role!",
-        },
-        { status: 403 },
-      );
-    }
-
     const { role } = await request.json();
+    const allowedRoles = ["admin", "creator", "user"];
 
     if (!allowedRoles.includes(role)) {
       return NextResponse.json(
@@ -116,7 +98,6 @@ export async function PATCH(request, { params }) {
 
     const usersCollection = await getUsers();
 
-    // ৩. ডাটাবেজ আপডেট
     const result = await usersCollection.updateOne(
       { _id: objectId },
       {
@@ -141,11 +122,10 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "User role updated successfully",
-      data: updatedUser,
+      message: "User updated successfully",
+      data: { ...updatedUser, _id: updatedUser._id.toString() },
     });
   } catch (error) {
-    console.error("PATCH_ERROR:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 },
@@ -155,12 +135,23 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const auth = await authorizeAdmin(request);
-    if (auth.response) return auth.response;
+    const admin = await verifyAdmin(request);
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Admin only access" },
+        { status: 403 },
+      );
+    }
 
-    const { id } = await params;
-    const objectId = getObjectId(id);
+    const userAuth = await verifyToken(request);
+    if (!userAuth) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
 
+    const objectId = toObjectId(params.id);
     if (!objectId) {
       return NextResponse.json(
         { success: false, message: "Invalid user id" },
@@ -169,10 +160,8 @@ export async function DELETE(request, { params }) {
     }
 
     const usersCollection = await getUsers();
-    const targetUser = await usersCollection.findOne(
-      { _id: objectId },
-      { projection: { password: 0 } },
-    );
+
+    const targetUser = await usersCollection.findOne({ _id: objectId });
 
     if (!targetUser) {
       return NextResponse.json(
@@ -181,18 +170,9 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const requesterId = auth.token?.id || auth.token?._id;
-
-    if (requesterId && requesterId.toString() === id) {
-      return NextResponse.json(
-        { success: false, message: "You cannot delete your own account" },
-        { status: 403 },
-      );
-    }
-
     if (targetUser.role === "admin") {
       return NextResponse.json(
-        { success: false, message: "Admin accounts cannot be deleted" },
+        { success: false, message: "Cannot delete admin account" },
         { status: 403 },
       );
     }
@@ -201,7 +181,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: `User ${targetUser.name || targetUser.email} deleted successfully`,
+      message: "User deleted successfully",
     });
   } catch (error) {
     return NextResponse.json(

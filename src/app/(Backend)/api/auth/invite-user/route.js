@@ -8,8 +8,8 @@ import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
 export async function POST(req) {
   try {
     const { email, role } = await req.json();
-    const admin = await verifyAdmin();
-    const Token = await verifyToken();
+    const admin = await verifyAdmin(req);
+    const Token = await verifyToken(req);
 
     if (!Token) {
       return NextResponse.json(
