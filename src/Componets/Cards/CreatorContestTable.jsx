@@ -40,7 +40,6 @@ const StatusBadge = ({ status }) => {
 };
 
 /* ── Deadline badge ── */
-// Only shows the date. Expired dates get a red tint — no "Expired" label.
 const DeadlineBadge = ({ deadline, isDark }) => {
   const isExpired = deadline ? new Date(deadline) < new Date() : false;
   const formatted = deadline
@@ -87,7 +86,7 @@ const CreatorContestTable = ({
   handleDelete,
   isDark,
   isLoading,
-  page
+  page,
 }) => {
   const muted = isDark ? "text-gray-500" : "text-gray-400";
   const text = isDark ? "text-gray-100" : "text-gray-800";
@@ -185,11 +184,14 @@ const CreatorContestTable = ({
           </tr>
         ) : (
           contests.map((contest, i) => {
-            const isExpired = contest.deadline
-              ? new Date(contest.deadline) < new Date()
-              : false;
+            // ✅ FIX: disabled when approved OR expired
+            const isDisabled =
+              contest.adminStatus === "approved" ||
+              (contest.deadline
+                ? new Date(contest.deadline) < new Date()
+                : false);
 
-            const editCls = isExpired
+            const editCls = isDisabled
               ? `p-2 rounded-lg opacity-30 cursor-not-allowed ${isDark ? "text-amber-400" : "text-amber-500"}`
               : `p-2 rounded-lg transition-all duration-150 ${
                   isDark
@@ -197,7 +199,7 @@ const CreatorContestTable = ({
                     : "text-amber-500 hover:bg-amber-50   hover:text-amber-700"
                 }`;
 
-            const deleteCls = isExpired
+            const deleteCls = isDisabled
               ? `p-2 rounded-lg opacity-30 cursor-not-allowed ${isDark ? "text-red-400" : "text-red-500"}`
               : `p-2 rounded-lg transition-all duration-150 ${
                   isDark
@@ -269,29 +271,33 @@ const CreatorContestTable = ({
                       <FiEye size={16} />
                     </Link>
 
-                    {/* Edit — disabled if expired */}
+                    {/* ✅ FIX: Edit — disabled if approved or expired */}
                     <button
-                      onClick={() => !isExpired && openEditModal(contest)}
+                      onClick={() => !isDisabled && openEditModal(contest)}
                       title={
-                        isExpired
-                          ? "Deadline passed — editing disabled"
+                        isDisabled
+                          ? contest.adminStatus === "approved"
+                            ? "Approved contest — editing disabled"
+                            : "Deadline passed — editing disabled"
                           : "Edit"
                       }
-                      disabled={isExpired}
+                      disabled={isDisabled}
                       className={editCls}
                     >
                       <FiEdit2 size={16} />
                     </button>
 
-                    {/* Delete — disabled if expired */}
+                    {/* ✅ FIX: Delete — disabled if approved or expired */}
                     <button
-                      onClick={() => !isExpired && handleDelete(contest._id)}
+                      onClick={() => !isDisabled && handleDelete(contest._id)}
                       title={
-                        isExpired
-                          ? "Deadline passed — deletion disabled"
+                        isDisabled
+                          ? contest.adminStatus === "approved"
+                            ? "Approved contest — deletion disabled"
+                            : "Deadline passed — deletion disabled"
                           : "Delete"
                       }
-                      disabled={isExpired}
+                      disabled={isDisabled}
                       className={deleteCls}
                     >
                       <FiTrash2 size={16} />

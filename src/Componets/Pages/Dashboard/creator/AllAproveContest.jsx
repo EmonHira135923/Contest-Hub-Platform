@@ -12,7 +12,6 @@ import {
   FiEdit2,
   FiTrash2,
   FiEye,
-  FiAward,
   FiX,
   FiCheck,
   FiDollarSign,
@@ -381,17 +380,19 @@ const AllAproveContest = () => {
     setIsEditModalOpen(true);
   };
 
-  /* RHF passes the validated & coerced data object directly — no e.preventDefault() needed */
   const handleEditSubmit = async (data) => {
     try {
-      const res = await axiosSecure.patch(`/api/allcontest/creator/${editingContest._id}`, {
-        title: data.title,
-        prize: data.prize,
-        registrationFee: data.registrationFee,
-        description: data.description,
-        instruction: data.instruction,
-        deadline: data.deadline,
-      });
+      const res = await axiosSecure.patch(
+        `/api/allcontest/creator/${editingContest._id}`,
+        {
+          title: data.title,
+          prize: data.prize,
+          registrationFee: data.registrationFee,
+          description: data.description,
+          instruction: data.instruction,
+          deadline: data.deadline,
+        },
+      );
       const result = await res.data;
       if (result.success) {
         toast.success("Contest updated successfully!");
@@ -409,15 +410,6 @@ const AllAproveContest = () => {
   /* ── Full page loading skeleton ── */
   if (isLoading && search === "" && page === 1)
     return <PageSkeleton isDark={isDark} />;
-
-  /* ── Derived stats ── */
-  const approvedCount = contests.filter(
-    (c) => c.adminStatus === "approved",
-  ).length;
-  const pendingCount = contests.filter(
-    (c) => c.adminStatus === "pending",
-  ).length;
-  const totalPrize = contests.reduce((s, c) => s + (Number(c.prize) || 0), 0);
 
   /* ── Theme tokens ── */
   const bg = isDark ? "bg-gray-950" : "bg-slate-50";
@@ -542,17 +534,23 @@ const AllAproveContest = () => {
               </div>
             ) : (
               contests.map((contest, i) => {
-                const isExpired = contest.deadline
-                  ? new Date(contest.deadline) < new Date()
-                  : false;
+                // ✅ FIX 1: disabled when approved OR expired (matches desktop logic)
+                const isDisabled =
+                  contest.adminStatus === "approved" ||
+                  (contest.deadline
+                    ? new Date(contest.deadline) < new Date()
+                    : false);
 
-                const editBtnCls = isExpired
+                // ✅ FIX 2: correct serial number across all pages
+                const serialNumber = (page - 1) * 10 + i + 1;
+
+                const editBtnCls = isDisabled
                   ? `flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold opacity-30 cursor-not-allowed
                       ${isDark ? "text-amber-400 bg-amber-500/10" : "text-amber-600 bg-amber-50"}`
                   : `flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition
                       ${isDark ? "text-amber-400 bg-amber-500/10 hover:bg-amber-500/20" : "text-amber-600 bg-amber-50 hover:bg-amber-100"}`;
 
-                const deleteBtnCls = isExpired
+                const deleteBtnCls = isDisabled
                   ? `flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold opacity-30 cursor-not-allowed
                       ${isDark ? "text-red-400 bg-red-500/10" : "text-red-600 bg-red-50"}`
                   : `flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition
@@ -565,10 +563,11 @@ const AllAproveContest = () => {
                   >
                     <div className="flex items-start justify-between gap-2 mb-2.5">
                       <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                        {/* ✅ FIX 2: serialNumber instead of i + 1 */}
                         <span
                           className={`mt-0.5 text-[11px] font-bold tabular-nums min-w-[20px] ${subtext}`}
                         >
-                          {i + 1}.
+                          {serialNumber}.
                         </span>
                         <div className="flex-1 min-w-0">
                           <p
@@ -609,13 +608,15 @@ const AllAproveContest = () => {
                         <FiEye size={13} /> View
                       </Link>
 
-                      {/* Edit — disabled if expired */}
+                      {/* ✅ FIX 1: Edit — disabled if approved or expired */}
                       <button
-                        onClick={() => !isExpired && openEditModal(contest)}
-                        disabled={isExpired}
+                        onClick={() => !isDisabled && openEditModal(contest)}
+                        disabled={isDisabled}
                         title={
-                          isExpired
-                            ? "Deadline passed — editing disabled"
+                          isDisabled
+                            ? contest.adminStatus === "approved"
+                              ? "Approved contest — editing disabled"
+                              : "Deadline passed — editing disabled"
                             : "Edit"
                         }
                         className={editBtnCls}
@@ -623,13 +624,15 @@ const AllAproveContest = () => {
                         <FiEdit2 size={13} /> Edit
                       </button>
 
-                      {/* Delete — disabled if expired */}
+                      {/* ✅ FIX 1: Delete — disabled if approved or expired */}
                       <button
-                        onClick={() => !isExpired && handleDelete(contest._id)}
-                        disabled={isExpired}
+                        onClick={() => !isDisabled && handleDelete(contest._id)}
+                        disabled={isDisabled}
                         title={
-                          isExpired
-                            ? "Deadline passed — deletion disabled"
+                          isDisabled
+                            ? contest.adminStatus === "approved"
+                              ? "Approved contest — deletion disabled"
+                              : "Deadline passed — deletion disabled"
                             : "Delete"
                         }
                         className={deleteBtnCls}
