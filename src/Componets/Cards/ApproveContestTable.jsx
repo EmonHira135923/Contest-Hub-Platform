@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React from "react";
+import { FiCheckCircle, FiXCircle, FiTrash2 } from "react-icons/fi";
 
 const ApproveContestTable = ({
   contests,
@@ -8,6 +9,7 @@ const ApproveContestTable = ({
   onReject,
   onDelete,
   isDark,
+  page = 1,
 }) => {
   return (
     <div
@@ -29,6 +31,7 @@ const ApproveContestTable = ({
                   : "border-gray-200 bg-gray-50 text-gray-600"
               }`}
             >
+              <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Contest</th>
               <th className="px-4 py-3">Creator</th>
               <th className="px-4 py-3">Reg. Fee</th>
@@ -48,7 +51,7 @@ const ApproveContestTable = ({
             {contests?.length === 0 ? (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="6"
                   className={`py-12 text-center ${
                     isDark ? "text-neutral-500" : "text-gray-400"
                   }`}
@@ -72,14 +75,23 @@ const ApproveContestTable = ({
                 </td>
               </tr>
             ) : (
-              contests.map((contest) => (
+              contests.map((contest, i) => (
                 <tr
                   key={contest?._id?.$oid || contest?._id}
                   className={`transition-colors duration-150 ${
                     isDark ? "hover:bg-neutral-900/40" : "hover:bg-gray-50/60"
                   }`}
                 >
-                  {/* Image & Title */}
+                  {/* ── Serial number ── */}
+                  <td
+                    className={`px-4 py-3 text-sm font-semibold tabular-nums ${
+                      isDark ? "text-neutral-400" : "text-gray-500"
+                    }`}
+                  >
+                    {(page - 1) * 10 + i + 1}.
+                  </td>
+
+                  {/* ── Image & Title ── */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
@@ -106,7 +118,7 @@ const ApproveContestTable = ({
                     </div>
                   </td>
 
-                  {/* Creator Email */}
+                  {/* ── Creator Email ── */}
                   <td
                     className={`px-4 py-3 truncate max-w-[160px] ${
                       isDark ? "text-neutral-400" : "text-gray-500"
@@ -115,7 +127,7 @@ const ApproveContestTable = ({
                     {contest?.creatorEmail}
                   </td>
 
-                  {/* Registration Fee */}
+                  {/* ── Registration Fee ── */}
                   <td
                     className={`px-4 py-3 font-mono font-medium whitespace-nowrap ${
                       isDark ? "text-neutral-200" : "text-gray-800"
@@ -124,7 +136,7 @@ const ApproveContestTable = ({
                     ${contest?.registrationFee}
                   </td>
 
-                  {/* Status Badge */}
+                  {/* ── Status Badge ── */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span
                       className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full uppercase tracking-wider ${
@@ -145,44 +157,48 @@ const ApproveContestTable = ({
                     </span>
                   </td>
 
-                  {/* Action Buttons */}
+                  {/* ── Action Buttons ── */}
+                  {/* ── Action Buttons ── */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center justify-center gap-1.5">
                       {contest?.adminStatus !== "approved" && (
                         <button
                           onClick={() => onApprove(contest?._id)}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
+                          title="Approve"
+                          className={`p-2 rounded-md transition-all duration-150 ${
                             isDark
                               ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
                               : "bg-emerald-600 text-white hover:bg-emerald-700"
                           }`}
                         >
-                          Approve
+                          <FiCheckCircle size={15} />
                         </button>
                       )}
 
                       {contest?.adminStatus !== "rejected" && (
                         <button
                           onClick={() => onReject(contest?._id)}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
+                          title="Reject"
+                          className={`p-2 rounded-md transition-all duration-150 ${
                             isDark
                               ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20"
                               : "bg-amber-500 text-white hover:bg-amber-600"
                           }`}
                         >
-                          Reject
+                          <FiXCircle size={15} />
                         </button>
                       )}
 
                       <button
                         onClick={() => onDelete(contest?._id)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
+                        title="Delete"
+                        className={`p-2 rounded-md transition-all duration-150 ${
                           isDark
                             ? "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20"
                             : "bg-rose-600 text-white hover:bg-rose-700"
                         }`}
                       >
-                        Delete
+                        <FiTrash2 size={15} />
                       </button>
                     </div>
                   </td>

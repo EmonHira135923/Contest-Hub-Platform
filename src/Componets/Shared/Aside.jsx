@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import useRole from "../utils/hooks/useRole";
 import useAuth from "../utils/hooks/useAuth";
+import { GoTasklist } from "react-icons/go";
 
 const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
@@ -88,14 +89,14 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
         {
           label: "Manage Contests",
           icon: ShieldCheck,
-          isGroup:true,
-          children:[
+          isGroup: true,
+          children: [
             {
-              label:"All Contest",
+              label: "All Contest",
               icon: FileText,
               href: "/dashboard/manage-contests",
-            }
-          ]
+            },
+          ],
         },
       ];
     }
@@ -104,19 +105,38 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
       return [
         ...common,
         {
-          label: "Add Contest",
-          icon: PlusCircle,
-          href: "/dashboard/add-contest",
+          label: "Manage Contests",
+          icon: ShieldCheck,
+          isGroup: true,
+          children: [
+            {
+              label: "All Contest",
+              icon: FileText,
+              href: "/dashboard/manage-creator-contests",
+            },
+            {
+              label: "Add Contest",
+              icon: PlusCircle,
+              href: "/create-contest",
+            },
+          ],
         },
         {
-          label: "My Created",
-          icon: ClipboardList,
-          href: "/dashboard/my-created",
-        },
-        {
-          label: "Submitted Tasks",
-          icon: FileText,
-          href: "/dashboard/submitted-tasks",
+          label: "Manage Tasks",
+          icon: GoTasklist,
+          isGroup: true,
+          children: [
+            {
+              label: "My Created",
+              icon: ClipboardList,
+              href: "/dashboard/my-created",
+            },
+            {
+              label: "Submitted Tasks",
+              icon: FileText,
+              href: "/dashboard/submitted-tasks",
+            },
+          ],
         },
       ];
     }

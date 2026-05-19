@@ -136,6 +136,7 @@ const Approvecontest = () => {
               onReject={handleRejectClick}
               onDelete={handleDeleteClick}
               isDark={isDark}
+              page={page}
             />
 
             {/* Pagination Setup */}
