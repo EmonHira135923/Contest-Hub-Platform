@@ -4,14 +4,6 @@ import { verifyToken } from "../../middlewares/verifyToken";
 
 export async function GET(request) {
   try {
-    const isUser = await verifyToken(request);
-    if (!isUser) {
-      return Response.json(
-        { success: false, message: "Unauthorized: Invalid credentials" },
-        { status: 401 },
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("q") || "";
     const categoryQuery = searchParams.get("category") || "";

@@ -64,14 +64,10 @@ export async function PATCH(request) {
       paidAt: new Date(),
     };
 
-    // ৭. কনটেস্ট স্ট্যাটাস আপডেট
+    // ৭. কনটেস্ট পার্টিসিপেন্ট কাউন্ট ইনক্রিমেন্ট
     const contestUpdate = {
-      $set: {
-        payment: "paid",
-        paidAt: new Date(),
-        transactionId: session.payment_intent,
-        updatedAt: new Date(),
-      },
+      $inc: { participantsCount: 1 },
+      $set: { updatedAt: new Date() },
     };
 
     // ৮. ডাটাবেসে পেমেন্ট ডাটা সেভ এবং ট্র্যাকিং লগ তৈরি
@@ -94,6 +90,7 @@ export async function PATCH(request) {
         success: true,
         message: "Payment confirmed & tracking started",
         trackingId: newTrackingId,
+        transactionId: session.payment_intent,
         data: result,
       },
       { status: 200 },

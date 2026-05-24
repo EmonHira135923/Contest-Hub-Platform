@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ContestEntryModal from "@/Componets/Shared/ContestEntryModal";
+import useAxiosSecure from "@/Componets/utils/hooks/useAxiosSecure";
+import useAuth from "@/Componets/utils/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   Users,
@@ -12,6 +16,10 @@ import {
 } from "lucide-react";
 
 const ContestCard = ({ contest, isDark }) => {
+  const axiosSecure = useAxiosSecure();
+  const { user, loading: authLoading } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const userEmail = user?.email;
   const [timeLeft, setTimeLeft] = useState(() => {
     if (!contest?.deadline) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -33,8 +41,6 @@ const ContestCard = ({ contest, isDark }) => {
   const [isClosed, setIsClosed] = useState(
     contest?.deadline ? new Date(contest.deadline) < new Date() : false,
   );
-
-  const isPaid = contest?.payment === "paid";
 
   // ⏰ লাইভ কাউন্টডাউন লজিক
   useEffect(() => {
@@ -79,6 +85,25 @@ const ContestCard = ({ contest, isDark }) => {
   };
 
   // 💳 Stripe পেমেন্ট গেটওয়েতে পাঠানোর হ্যান্ডলার
+
+  const { data: paymentData, isLoading: isPaymentLoading } = useQuery({
+    queryKey: ["contest-payment", contest?._id, userEmail],
+    enabled: !!contest?._id && !!userEmail && !authLoading,
+    retry: false,
+    queryFn: async () => {
+      const res = await axiosSecure.get(
+        `/api/payment-success?contestId=${contest._id}`,
+      );
+      return res.data;
+    },
+  });
+
+  const hasPurchased =
+    paymentData?.success &&
+    paymentData.result?.some((payment) => payment.paymentStatus === "paid");
+  const canJoinContest = Boolean(userEmail && hasPurchased);
+  const isCheckingPayment =
+    authLoading || (!!userEmail && isPaymentLoading);
 
   const timeBoxStyle = `flex flex-col items-center justify-center w-12 h-14 rounded-xl font-bold ${
     isDark ? "bg-indigo-600/20 text-indigo-400" : "bg-indigo-600 text-white"
@@ -160,11 +185,6 @@ const ContestCard = ({ contest, isDark }) => {
             >
               {formatCategory(contest?.category)}
             </span>
-            {isPaid && (
-              <span className="ml-2 inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-400">
-                Paid
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-1.5 text-amber-500 font-bold">
             <Trophy size={16} />
@@ -252,19 +272,33 @@ const ContestCard = ({ contest, isDark }) => {
           <ArrowUpRight size={14} />
         </Link>
 
-        {isPaid ? (
-          <button
-            disabled
-            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-emerald-500/10 text-emerald-200 cursor-not-allowed"
-          >
-            Paid
-          </button>
-        ) : isClosed ? (
+        {isClosed ? (
           <button
             disabled
             className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
           >
             Closed
+          </button>
+        ) : isCheckingPayment ? (
+          <button
+            type="button"
+            disabled
+            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
+          >
+            Checking...
+          </button>
+        ) : canJoinContest ? (
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+              isDark
+                ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-900/20"
+                : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-200"
+            }`}
+          >
+            Join Contest
+            <CreditCard size={14} />
           </button>
         ) : (
           <Link
@@ -280,6 +314,14 @@ const ContestCard = ({ contest, isDark }) => {
           </Link>
         )}
       </div>
+
+      {isModalOpen && (
+        <ContestEntryModal
+          contest={contest}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

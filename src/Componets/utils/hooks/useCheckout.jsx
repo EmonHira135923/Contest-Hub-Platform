@@ -21,6 +21,7 @@ const useCheckout = (contest) => {
         category: contest.category,
         image: contest.image,
         registrationFee: contest.registrationFee,
+        transactionId: contest.payment_intent,
         userEmail,
         userName,
       };

@@ -9,7 +9,6 @@ const PaymentForm = ({ contest }) => {
   const isDark = theme === "dark";
 
   const isFree = contest.registrationFee <= 0;
-  const isPaid = contest?.payment === "paid";
 
   return (
     <div
@@ -250,8 +249,6 @@ const PaymentForm = ({ contest }) => {
                 <Spinner />
                 Starting checkout…
               </>
-            ) : isPaid ? (
-              "Already Paid"
             ) : (
               <>
                 <StripeIcon />
@@ -260,21 +257,6 @@ const PaymentForm = ({ contest }) => {
             )}
           </span>
         </button>
-
-        {/* Paid contest warning */}
-        {isPaid && (
-          <p
-            style={{
-              marginTop: "16px",
-              textAlign: "center",
-              fontSize: "13px",
-              fontWeight: "600",
-              color: isDark ? "#34d399" : "#047857",
-            }}
-          >
-            This contest is already paid. Thank you for your registration.
-          </p>
-        )}
 
         {/* Free contest warning */}
         {isFree && (

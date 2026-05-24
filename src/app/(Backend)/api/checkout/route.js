@@ -48,6 +48,7 @@ export async function POST(req) {
         userEmail: body.userEmail,
         userName: body.userName || "Participant",
         trackingId: finalTrackingId,
+        transactioId: body.pay,
       },
 
       // ৫. ডাইনামিক সাকসেস ইউআরএল পাথ রিডাইরেকশন
@@ -55,10 +56,12 @@ export async function POST(req) {
       cancel_url: `${appUrl}/payment/cancel`,
     });
 
-    console.log(
-      `Checkout Session Created for Contest [${body}] with Tracking ID:`,
-      finalTrackingId,
-    );
+    // console.log(
+    //   `Checkout Session Created for Contest [${body}] with Tracking ID:`,
+    //   finalTrackingId,
+    // );
+
+    console.log("Stripe payment", body);
 
     return Response.json({ url: session.url });
   } catch (err) {

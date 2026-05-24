@@ -1,8 +1,13 @@
 "use client";
+
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
+import useAxiosSecure from "@/Componets/utils/hooks/useAxiosSecure";
+import useAuth from "@/Componets/utils/hooks/useAuth";
+import ContestEntryModal from "@/Componets/Shared/ContestEntryModal";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   Users,
@@ -14,7 +19,6 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-// 📝 বড় টেক্সট হ্যান্ডেল করার জন্য কাস্টম কম্পোনেন্ট
 const ExpandableText = ({ text, isDark }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -32,6 +36,7 @@ const ExpandableText = ({ text, isDark }) => {
       </p>
       {shouldTruncate && (
         <button
+          type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="inline-flex items-center gap-1 text-sm font-bold text-indigo-500 hover:text-indigo-400 transition-colors"
         >
@@ -53,19 +58,42 @@ const ExpandableText = ({ text, isDark }) => {
 const Detailspage = ({ contest }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const axiosSecure = useAxiosSecure();
+  const { user, loading: authLoading } = useAuth();
+  const userEmail = user?.email;
 
-  // ডেডলাইন চেক
   const isClosed = contest?.deadline
     ? new Date(contest.deadline) < new Date()
     : false;
-  const hasPaid = contest?.payment === "paid";
+
+  const { data: paymentData, isLoading: isPaymentLoading } = useQuery({
+    queryKey: ["contest-payment", contest?._id, userEmail],
+    enabled: !!contest?._id && !!userEmail && !authLoading,
+    retry: false,
+    queryFn: async () => {
+      const res = await axiosSecure.get(
+        `/api/payment-success?contestId=${contest._id}`,
+      );
+      return res.data;
+    },
+  });
+
+  const hasPurchased =
+    paymentData?.success &&
+    paymentData.result?.some((payment) => payment.paymentStatus === "paid");
+  const isCheckingPayment =
+    authLoading || (!!userEmail && isPaymentLoading);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
 
   return (
     <div
       className={`min-h-screen py-12 px-4 transition-colors duration-300 ${isDark ? "bg-[#05050a] text-white" : "bg-slate-50 text-slate-900"}`}
     >
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* 🔙 Back Button */}
         <Link
           href="/all-contests"
           className={`inline-flex items-center gap-2 text-sm font-bold transition-colors ${isDark ? "text-slate-400" : "text-slate-600"}`}
@@ -73,7 +101,6 @@ const Detailspage = ({ contest }) => {
           <ArrowLeft size={16} /> Back to all contests
         </Link>
 
-        {/* 🖼️ Hero Banner & Main Info */}
         <div
           className={`rounded-3xl border overflow-hidden shadow-xl ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
         >
@@ -108,21 +135,14 @@ const Detailspage = ({ contest }) => {
                 </p>
               </div>
 
-              {/* 💰 Prize Tag */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/10 text-amber-500 font-black text-xl border border-amber-500/20">
                   <Trophy size={24} />
                   <span>$ {contest?.prize?.toLocaleString()}</span>
                 </div>
-                {hasPaid && (
-                  <span className="inline-flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-300 px-4 py-2 text-sm font-semibold">
-                    Contest Paid
-                  </span>
-                )}
               </div>
             </div>
 
-            {/* 📊 Core Stats Grid */}
             <div
               className={`grid grid-cols-2 md:grid-cols-3 gap-4 border-t pt-6 ${isDark ? "border-white/5" : "border-slate-100"}`}
             >
@@ -175,7 +195,6 @@ const Detailspage = ({ contest }) => {
           </div>
         </div>
 
-        {/* 📚 Detailed Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2 space-y-8">
             <div
@@ -199,7 +218,6 @@ const Detailspage = ({ contest }) => {
             </div>
           </div>
 
-          {/* Right Sticky Sidebar */}
           <div className="sticky top-6 space-y-6">
             <div
               className={`p-6 rounded-3xl border text-center space-y-4 shadow-md ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
@@ -215,20 +233,42 @@ const Detailspage = ({ contest }) => {
                 </p>
               </div>
 
-              <button
-                type="button"
-                disabled={isClosed || hasPaid}
-                className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
-                  hasPaid
-                    ? "bg-emerald-500/10 text-emerald-200 cursor-not-allowed"
-                    : isClosed
-                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20 hover:scale-[1.02]"
-                }`}
-              >
-                <CreditCard size={18} />
-                {hasPaid ? "Already Paid" : isClosed ? "Registration Closed" : "Pay & Join Now"}
-              </button>
+              {hasPurchased ? (
+                <button
+                  type="button"
+                  onClick={handleOpenModal}
+                  className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
+                    isClosed
+                      ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                      : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20 hover:scale-[1.02]"
+                  }`}
+                  disabled={isClosed || isPaymentLoading}
+                >
+                  <CreditCard size={18} />
+                  {isClosed ? "Registration Closed" : "Join Contest"}
+                </button>
+              ) : isCheckingPayment ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md bg-gray-500 text-gray-300 cursor-not-allowed"
+                >
+                  <CreditCard size={18} />
+                  Checking payment...
+                </button>
+              ) : (
+                <Link
+                  href={`/payment/${contest?._id}`}
+                  className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
+                    isClosed
+                      ? "pointer-events-none bg-gray-500 text-gray-300 cursor-not-allowed"
+                      : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20 hover:scale-[1.02]"
+                  }`}
+                >
+                  <CreditCard size={18} />
+                  {isClosed ? "Registration Closed" : "Pay & Join Now"}
+                </Link>
+              )}
 
               <p className="text-[11px] text-slate-500 leading-normal">
                 {isClosed
@@ -239,6 +279,14 @@ const Detailspage = ({ contest }) => {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <ContestEntryModal
+          contest={contest}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
