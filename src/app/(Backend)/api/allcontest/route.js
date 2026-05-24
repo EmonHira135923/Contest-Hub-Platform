@@ -98,6 +98,7 @@ export async function POST(request) {
       participantsCount: 0,
       adminStatus: "pending", // অ্যাডমিন চেক করার জন্য
       payment: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
+      contestSubmissionStatus: "not-submitted",
       creatorEmail: body.creatorEmail,
       createdAt: new Date(),
       updatedAt: new Date(),

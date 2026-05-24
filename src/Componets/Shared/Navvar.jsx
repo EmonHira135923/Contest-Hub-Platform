@@ -42,10 +42,7 @@ export default function Navvar() {
       ? [
           // শুধুমাত্র 'user' রোলের জন্য এই লিঙ্কগুলো দেখাবে
           ...(role === "user"
-            ? [
-                { name: "BeACreator", href: "/be-a-creator" },
-                { name: "Leaderboard", href: "/leaderboard" },
-              ]
+            ? [{ name: "BeACreator", href: "/be-a-creator" }]
             : []),
           // 'creator' রোলের জন্য এই লিঙ্কটি দেখাবে
           ...(role === "creator"
@@ -54,6 +51,7 @@ export default function Navvar() {
         ]
       : []),
     { name: "Contest Arena", href: "/contest-arena" },
+    { name: "Leaderboard", href: "/leaderboard" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];

@@ -49,6 +49,7 @@ export async function POST(req) {
         userName: body.userName || "Participant",
         trackingId: finalTrackingId,
         transactioId: body.pay,
+        contestSubmissionStatus: "not-submitted",
       },
 
       // ৫. ডাইনামিক সাকসেস ইউআরএল পাথ রিডাইরেকশন

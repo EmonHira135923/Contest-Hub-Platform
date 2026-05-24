@@ -22,6 +22,7 @@ const useCheckout = (contest) => {
         image: contest.image,
         registrationFee: contest.registrationFee,
         transactionId: contest.payment_intent,
+        contestDeadline: contest.deadline,
         userEmail,
         userName,
       };

@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { MdTaskAlt, MdOutlineLeaderboard } from "react-icons/md";
 
 const ExpandableText = ({ text, isDark }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -67,6 +68,7 @@ const Detailspage = ({ contest }) => {
     ? new Date(contest.deadline) < new Date()
     : false;
 
+  // 💳 পেমেন্ট ডাটা কুয়েরি
   const { data: paymentData, isLoading: isPaymentLoading } = useQuery({
     queryKey: ["contest-payment", contest?._id, userEmail],
     enabled: !!contest?._id && !!userEmail && !authLoading,
@@ -79,15 +81,30 @@ const Detailspage = ({ contest }) => {
     },
   });
 
-  const hasPurchased =
-    paymentData?.success &&
-    paymentData.result?.some((payment) => payment.paymentStatus === "paid");
-  const isCheckingPayment =
-    authLoading || (!!userEmail && isPaymentLoading);
+  // 🎯 পেমেন্ট অ্যারে থেকে শুধুমাত্র নির্দিষ্ট লগইন থাকা ইউজারের ডাটা খুঁজে বের করা
+  const userPaymentInfo = paymentData?.success
+    ? paymentData.result?.find(
+        (payment) =>
+          payment.paymentStatus === "paid" &&
+          payment.customer_email === userEmail,
+      )
+    : null;
+
+  // 🔒 ইউজারের পার্সোনাল পেমেন্ট ও সাবমিশন ডাটা এক্সট্র্যাক্ট করা
+  const hasPurchased = Boolean(userPaymentInfo);
+  const isCheckingPayment = authLoading || (!!userEmail && isPaymentLoading);
+
+  // 🚀 ডাটাবেজের পেমেন্ট ডাটা থেকে ইউজারের নিজস্ব স্ট্যাটাস
+  const isUserSubmitted =
+    userPaymentInfo?.contestSubmissionStatus === "submitted";
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
+
+  // গ্লোবাল উইনার কন্ডিশন (সবার জন্য একই থাকবে)
+  const isWinnerDeclared =
+    contest?.winnerDeclareStatus === "completed" || contest?.isWinnerDeclared;
 
   return (
     <div
@@ -111,8 +128,9 @@ const Detailspage = ({ contest }) => {
                 alt={contest.title}
                 fill
                 className="object-cover"
+                priority
               />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <span className="absolute bottom-6 left-6 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white">
                 {contest?.category?.replace("-", " ")}
               </span>
@@ -222,18 +240,59 @@ const Detailspage = ({ contest }) => {
             <div
               className={`p-6 rounded-3xl border text-center space-y-4 shadow-md ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
             >
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
-                  Registration Cost
-                </p>
-                <p className="text-4xl font-black text-indigo-500 mt-1">
-                  {contest?.registrationFee === 0
-                    ? "Free"
-                    : `$${contest?.registrationFee}`}
-                </p>
-              </div>
+              {/* পেমেন্ট করা হয়ে গেলে, সাবমিট করলে বা উইনার ডিক্লেয়ার হলে Registration Cost হাইড হবে */}
+              {!hasPurchased && !isUserSubmitted && !isWinnerDeclared && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
+                    Registration Cost
+                  </p>
+                  <p className="text-4xl font-black text-indigo-500 mt-1">
+                    {contest?.registrationFee === 0
+                      ? "Free"
+                      : `$${contest?.registrationFee}`}
+                  </p>
+                </div>
+              )}
 
-              {hasPurchased ? (
+              {/* 🔘 কন্ডিশনাল অ্যাকশন বাটন সেকশন */}
+              {isWinnerDeclared ? (
+                /* ১. ক্রিয়েটর উইনার ডিক্লেয়ার করলে "See Your Result" লেখা সহ লিডারবোর্ড বাটন (শীর্ষ অগ্রাধিকার) */
+                <Link
+                  href={`/leaderboard/${contest?._id}`}
+                  className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
+                    isDark
+                      ? "bg-amber-600 text-white hover:bg-amber-500"
+                      : "bg-amber-500 text-white hover:bg-amber-400"
+                  } hover:scale-[1.02]`}
+                >
+                  <MdOutlineLeaderboard size={18} />
+                  See Your Result
+                </Link>
+              ) : isCheckingPayment ? (
+                /* ২. পেমেন্ট ভেরিফিকেশন লোডিং স্টেট */
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md bg-gray-500 text-gray-300 cursor-not-allowed"
+                >
+                  <CreditCard size={18} />
+                  Checking status...
+                </button>
+              ) : isUserSubmitted ? (
+                /* ৩. ইউজার সাবমিট করে দিলে এই বাটনটি লকড থাকবে এবং কোথাও নিয়ে যাবে না */
+                <button
+                  type="button"
+                  disabled
+                  className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed transition-all shadow-md border ${
+                    isDark
+                      ? "bg-blue-600/20 border-blue-500/40 text-blue-400"
+                      : "bg-blue-50 border border-blue-200 text-blue-500"
+                  }`}
+                >
+                  Result Pending
+                </button>
+              ) : hasPurchased ? (
+                /* ৪. পেমেন্ট ভেরিফাইড এবং সাবমিশন বাকি থাকলে */
                 <button
                   type="button"
                   onClick={handleOpenModal}
@@ -242,21 +301,13 @@ const Detailspage = ({ contest }) => {
                       ? "bg-gray-500 text-gray-300 cursor-not-allowed"
                       : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20 hover:scale-[1.02]"
                   }`}
-                  disabled={isClosed || isPaymentLoading}
+                  disabled={isClosed}
                 >
-                  <CreditCard size={18} />
-                  {isClosed ? "Registration Closed" : "Join Contest"}
-                </button>
-              ) : isCheckingPayment ? (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md bg-gray-500 text-gray-300 cursor-not-allowed"
-                >
-                  <CreditCard size={18} />
-                  Checking payment...
+                  <MdTaskAlt size={18} />
+                  {isClosed ? "Registration Closed" : "Submit Contest"}
                 </button>
               ) : (
+                /* ৫. একদম নতুন ইউজার হলে "Pay & Join Now" বাটন */
                 <Link
                   href={`/payment/${contest?._id}`}
                   className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
@@ -273,7 +324,11 @@ const Detailspage = ({ contest }) => {
               <p className="text-[11px] text-slate-500 leading-normal">
                 {isClosed
                   ? "This competition has reached its submission deadline."
-                  : "Secured transactions. Slots are allocated dynamically upon registration."}
+                  : isWinnerDeclared
+                    ? "The official results for this contest have been declared. Check the leaderboard above."
+                    : isUserSubmitted
+                      ? "Your assignment is under evaluation. Once the creator selects a winner, results will be live."
+                      : "Secured transactions. Slots are allocated dynamically upon registration."}
               </p>
             </div>
           </div>
@@ -285,6 +340,7 @@ const Detailspage = ({ contest }) => {
           contest={contest}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          userEmail={userEmail}
         />
       )}
     </div>

@@ -13,7 +13,9 @@ import {
   ArrowUpRight,
   DollarSign,
   CreditCard,
+  ExternalLink,
 } from "lucide-react";
+import { MdOutlineLeaderboard, MdTaskAlt } from "react-icons/md";
 
 const ContestCard = ({ contest, isDark }) => {
   const axiosSecure = useAxiosSecure();
@@ -84,8 +86,7 @@ const ContestCard = ({ contest, isDark }) => {
       .join(" ");
   };
 
-  // 💳 Stripe পেমেন্ট গেটওয়েতে পাঠানোর হ্যান্ডলার
-
+  // 💳 পেমেন্ট কুয়েরি
   const { data: paymentData, isLoading: isPaymentLoading } = useQuery({
     queryKey: ["contest-payment", contest?._id, userEmail],
     enabled: !!contest?._id && !!userEmail && !authLoading,
@@ -98,12 +99,25 @@ const ContestCard = ({ contest, isDark }) => {
     },
   });
 
-  const hasPurchased =
-    paymentData?.success &&
-    paymentData.result?.some((payment) => payment.paymentStatus === "paid");
+  // 🎯 নির্দিষ্ট লগইন থাকা ইউজারের পেমেন্ট অবজেক্টটি খুঁজে বের করা
+  const userPaymentInfo = paymentData?.success
+    ? paymentData.result?.find(
+        (payment) =>
+          payment.paymentStatus === "paid" &&
+          payment.customer_email === userEmail,
+      )
+    : null;
+
+  // 🔒 ইউজারের পার্সোনাল পেমেন্ট স্ট্যাটাস থেকে কন্ডিশনগুলো হ্যান্ডেল করা
+  const hasPurchased = Boolean(userPaymentInfo);
   const canJoinContest = Boolean(userEmail && hasPurchased);
-  const isCheckingPayment =
-    authLoading || (!!userEmail && isPaymentLoading);
+  const isCheckingPayment = authLoading || (!!userEmail && isPaymentLoading);
+
+  // 🚀 ডাটাবেজের পেমেন্ট কালেকশন থেকে ইন্ডিভিজুয়াল ইউজারের সাবমিশন স্ট্যাটাস
+  const isUserSubmitted =
+    userPaymentInfo?.contestSubmissionStatus === "submitted";
+  const isWinnerDeclared =
+    contest?.winnerDeclareStatus === "completed" || contest?.isWinnerDeclared;
 
   const timeBoxStyle = `flex flex-col items-center justify-center w-12 h-14 rounded-xl font-bold ${
     isDark ? "bg-indigo-600/20 text-indigo-400" : "bg-indigo-600 text-white"
@@ -272,13 +286,19 @@ const ContestCard = ({ contest, isDark }) => {
           <ArrowUpRight size={14} />
         </Link>
 
-        {isClosed ? (
-          <button
-            disabled
-            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
+        {/* ১. ক্রিয়েটর উইনার ডিক্লেয়ার করে ফেললে "See Your Result" বাটন আসবে (সবার উপরে অগ্রাধিকার পাবে) */}
+        {isWinnerDeclared ? (
+          <Link
+            href={`/leaderboard/${contest?._id}`}
+            className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+              isDark
+                ? "bg-amber-600 text-white hover:bg-amber-500"
+                : "bg-amber-500 text-white hover:bg-amber-400"
+            }`}
           >
-            Closed
-          </button>
+            See Your Result
+            <MdOutlineLeaderboard size={14} />
+          </Link>
         ) : isCheckingPayment ? (
           <button
             type="button"
@@ -286,6 +306,26 @@ const ContestCard = ({ contest, isDark }) => {
             className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
           >
             Checking...
+          </button>
+        ) : isUserSubmitted ? (
+          /* ২. ইউজার অলরেডি সাবমিট করে দিলে এই বাটনটি পুরোপুরি 'disabled' থাকবে এবং কোথাও নিয়ে যাবে না */
+          <button
+            type="button"
+            disabled
+            className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed transition-all ${
+              isDark
+                ? "bg-blue-600/20 text-blue-400 border border-blue-500/20"
+                : "bg-blue-50 border border-blue-200 text-blue-500"
+            }`}
+          >
+            Result Pending
+          </button>
+        ) : isClosed ? (
+          <button
+            disabled
+            className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
+          >
+            Closed
           </button>
         ) : canJoinContest ? (
           <button
@@ -297,8 +337,8 @@ const ContestCard = ({ contest, isDark }) => {
                 : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-200"
             }`}
           >
-            Join Contest
-            <CreditCard size={14} />
+            Submit Contest
+            <MdTaskAlt size={14} />
           </button>
         ) : (
           <Link
@@ -319,6 +359,7 @@ const ContestCard = ({ contest, isDark }) => {
         <ContestEntryModal
           contest={contest}
           isOpen={isModalOpen}
+          userEmail={userEmail} // 🎯 সঠিক ইমেল পাস করা হলো ট্র্যাকিংয়ের জন্য
           onClose={() => setIsModalOpen(false)}
         />
       )}

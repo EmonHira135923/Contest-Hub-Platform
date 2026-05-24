@@ -61,6 +61,7 @@ export async function PATCH(request) {
       customer_email: session.customer_email || userEmail,
       trackingId: newTrackingId,
       paymentStatus: "paid",
+      contestSubmissionStatus: "not-submitted",
       paidAt: new Date(),
     };
 
@@ -126,6 +127,7 @@ export async function GET(request) {
 
     const query = {
       customer_email: user.email,
+      paymentStatus: "paid",
     };
 
     if (contestId) {
