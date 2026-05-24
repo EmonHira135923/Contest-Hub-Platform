@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   Shield,
   User2,
+  Wallet,
+  CreditCard,
 } from "lucide-react";
 import useRole from "../utils/hooks/useRole";
 import useAuth from "../utils/hooks/useAuth";
@@ -58,6 +60,35 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
       return [
         ...common,
         {
+          label: "Manage Contests",
+          icon: ShieldCheck,
+          isGroup: true,
+          children: [
+            {
+              label: "My Contest",
+              icon: ClipboardList,
+              href: "/dashboard/manage-mycontest",
+            },
+            {
+              label: "All Contest",
+              icon: FileText,
+              href: "/dashboard/manage-contests",
+            },
+          ],
+        },
+        {
+          label: "Manage Payment",
+          icon: Wallet,
+          isGroup: true,
+          children: [
+            {
+              label: "My Payments",
+              icon: ClipboardList,
+              href: "/dashboard/manage-mypayments",
+            },
+          ],
+        },
+        {
           label: "Manage Users",
           icon: Users,
           isGroup: true,
@@ -86,18 +117,6 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
             },
           ],
         },
-        {
-          label: "Manage Contests",
-          icon: ShieldCheck,
-          isGroup: true,
-          children: [
-            {
-              label: "All Contest",
-              icon: FileText,
-              href: "/dashboard/manage-contests",
-            },
-          ],
-        },
       ];
     }
 
@@ -110,6 +129,11 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
           isGroup: true,
           children: [
             {
+              label: "My Contest",
+              icon: ClipboardList,
+              href: "/dashboard/manage-mycontest",
+            },
+            {
               label: "All Contest",
               icon: FileText,
               href: "/dashboard/manage-creator-contests",
@@ -118,6 +142,18 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
               label: "Add Contest",
               icon: PlusCircle,
               href: "/create-contest",
+            },
+          ],
+        },
+        {
+          label: "Manage Payments",
+          icon: Wallet,
+          isGroup: true,
+          children: [
+            {
+              label: "All Payment",
+              icon: CreditCard,
+              href: "/dashboard/manage-mypayments",
             },
           ],
         },
@@ -144,6 +180,35 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
     return [
       ...common,
       {
+        label: "Manage Contests",
+        icon: Trophy,
+        isGroup: true,
+        children: [
+          {
+            label: "My Contest",
+            icon: ClipboardList,
+            href: "/dashboard/manage-mycontest",
+          },
+          {
+            label: "Winning Contests",
+            icon: Trophy,
+            href: "/dashboard/my-winning",
+          },
+        ],
+      },
+      {
+        label: "Manage Payments",
+        icon: Wallet,
+        isGroup: true,
+        children: [
+          {
+            label: "All Payment",
+            icon: CreditCard,
+            href: "/dashboard/manage-mypayments",
+          },
+        ],
+      },
+      {
         label: "Manage Creators",
         icon: ShieldCheck,
         isGroup: true,
@@ -152,23 +217,6 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
             label: "Be-A-Creator",
             icon: PlusCircle,
             href: "/be-a-creator",
-          },
-        ],
-      },
-      {
-        label: "My Contests",
-        icon: Trophy,
-        isGroup: true,
-        children: [
-          {
-            label: "Participated",
-            icon: CheckCircle2,
-            href: "/dashboard/my-participated",
-          },
-          {
-            label: "Winning Contests",
-            icon: Trophy,
-            href: "/dashboard/my-winning",
           },
         ],
       },

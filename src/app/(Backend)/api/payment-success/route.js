@@ -116,9 +116,10 @@ export async function GET(request) {
 
     const search = searchParams.get("search");
     const contestId = searchParams.get("contestId");
-    const page = parseInt(searchParams.get("page")) || 1;
 
-    const limit = 10;
+    // Parse the limit sent by the frontend, fall back to 10
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 10;
     const skip = (page - 1) * limit;
 
     const paymentsCollections = await getPayments();
