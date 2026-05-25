@@ -1,143 +1,258 @@
 "use client";
+import PaymentsTable from "@/Componets/Cards/PaymentsTable";
 import Pagination from "@/Componets/Shared/Pagination";
+import PaymentTableSkeleton from "@/Componets/Skeltons/PaymentSkelton";
 import useMyPayments from "@/Componets/utils/hooks/useMyPayments";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
-import React, { useState } from "react";
+import { useState } from "react";
+import {
+  TbSearch,
+  TbReceipt2,
+  TbCircleCheck,
+  TbClock,
+  TbCurrencyDollar,
+  TbX,
+} from "react-icons/tb";
 
+// ─── Status badge ─────────────────────────────────────────────────────────────
+const StatusBadge = ({ status }) => {
+  const s = status?.toLowerCase();
+  const isPaid = s === "success" || s === "paid";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
+        isPaid
+          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+      }`}
+    >
+      {isPaid ? (
+        <TbCircleCheck className="w-3 h-3" />
+      ) : (
+        <TbClock className="w-3 h-3" />
+      )}
+      {status || "Pending"}
+    </span>
+  );
+};
+
+// ─── Stat card ───────────────────────────────────────────────────────────────
+const StatCard = ({ label, value, icon: Icon, isDark, accent }) => (
+  <div
+    className={`rounded-xl border p-4 flex items-start gap-3 ${
+      isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+    }`}
+  >
+    <div
+      className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${accent}`}
+    >
+      <Icon className="w-4 h-4 text-white" />
+    </div>
+    <div className="min-w-0">
+      <p
+        className={`text-[10.5px] font-semibold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}
+      >
+        {label}
+      </p>
+      <p
+        className={`text-lg font-bold leading-tight truncate ${isDark ? "text-slate-100" : "text-slate-900"}`}
+      >
+        {value}
+      </p>
+    </div>
+  </div>
+);
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 const Mypaymentpage = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // 1. Local states to handle filtering and pagination
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 2. Pass state values into your custom TanStack hook
   const { payments, meta, isLoading } = useMyPayments(
     searchTerm,
     currentPage,
     itemsPerPage,
   );
 
-  // Calculate total pages safely from meta data
   const totalPages = Math.ceil((meta?.total || 0) / itemsPerPage);
 
-  // 3. Handle search input changes reset page to 1
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
 
+  const clearSearch = () => {
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
+  if (isLoading) return <PaymentTableSkeleton />;
+
+  // ── Derived stats ──
+  const totalPaid = payments
+    .filter((p) => ["success", "paid"].includes(p.paymentStatus?.toLowerCase()))
+    .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+  const paidCount = payments.filter((p) =>
+    ["success", "paid"].includes(p.paymentStatus?.toLowerCase()),
+  ).length;
+
+  const pendingCount = payments.length - paidCount;
+
+  const formatDate = (raw) => {
+    if (!raw) return "N/A";
+    const d = new Date(raw?.$date || raw);
+    return isNaN(d)
+      ? "N/A"
+      : d.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+  };
+
   return (
     <div
-      className={`p-6 min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
+      className={`min-h-screen transition-colors ${
+        isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
+      }`}
     >
-      <div className="max-w-6xl mx-auto">
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* ── Page header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1
+              className={`text-2xl font-bold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}
+            >
               Payment History
             </h1>
-            <p className="text-sm text-gray-500">
-              View and track your contest payments
+            <p
+              className={`text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            >
+              View and track all your contest payments
             </p>
           </div>
 
-          {/* Search Input */}
-          <div className="w-full md:w-72">
+          {/* Search */}
+          <div
+            className={`flex items-center gap-2 w-full sm:w-72 px-3 py-2 rounded-xl border transition-colors ${
+              isDark
+                ? "bg-slate-900 border-slate-700 focus-within:border-blue-500"
+                : "bg-white border-slate-200 focus-within:border-blue-400"
+            }`}
+          >
+            <TbSearch
+              className={`w-4 h-4 flex-shrink-0 ${isDark ? "text-slate-500" : "text-slate-400"}`}
+            />
             <input
               type="text"
-              placeholder="Search trans ID, status..."
+              placeholder="Search transaction ID, status…"
               value={searchTerm}
               onChange={handleSearchChange}
-              className={`w-full px-4 py-2 rounded-lg border text-sm outline-none transition-all ${
-                isDark
-                  ? "bg-gray-800 border-gray-700 focus:border-blue-500 text-white"
-                  : "bg-white border-gray-300 focus:border-blue-500 text-gray-900"
+              className={`flex-1 text-sm bg-transparent outline-none placeholder:text-slate-400 min-w-0 ${
+                isDark ? "text-slate-100" : "text-slate-900"
               }`}
             />
+            {searchTerm && (
+              <button onClick={clearSearch} className="flex-shrink-0">
+                <TbX
+                  className={`w-4 h-4 ${isDark ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"}`}
+                />
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Table & Data State Handling */}
+        {/* ── Stat cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard
+            label="Total payments"
+            value={meta?.total ?? payments.length}
+            icon={TbReceipt2}
+            isDark={isDark}
+            accent="bg-blue-500"
+          />
+          <StatCard
+            label="Total paid"
+            value={`$${totalPaid.toFixed(2)}`}
+            icon={TbCurrencyDollar}
+            isDark={isDark}
+            accent="bg-emerald-500"
+          />
+          <StatCard
+            label="Successful"
+            value={paidCount}
+            icon={TbCircleCheck}
+            isDark={isDark}
+            accent="bg-green-500"
+          />
+          <StatCard
+            label="Pending"
+            value={pendingCount}
+            icon={TbClock}
+            isDark={isDark}
+            accent="bg-amber-500"
+          />
+        </div>
+
+        {/* ── Table card ── */}
         <div
-          className={`overflow-x-auto rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+          className={`rounded-2xl border overflow-hidden ${
+            isDark
+              ? "bg-slate-900 border-slate-800"
+              : "bg-white border-slate-200"
+          }`}
         >
-          {isLoading ? (
-            <div className="p-12 text-center text-sm text-gray-500">
-              Loading your payments...
-            </div>
-          ) : payments.length === 0 ? (
-            <div className="p-12 text-center text-sm text-gray-500">
-              No payment history records found.
+          {payments.length === 0 ? (
+            /* ── Empty state ── */
+            <div className="py-16 flex flex-col items-center gap-3">
+              <div
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isDark ? "bg-slate-800" : "bg-slate-100"}`}
+              >
+                <TbReceipt2
+                  className={`w-7 h-7 ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                />
+              </div>
+              <p
+                className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                {searchTerm ? "No results found" : "No payment history yet"}
+              </p>
+              {searchTerm && (
+                <button
+                  onClick={clearSearch}
+                  className={`text-xs underline underline-offset-2 ${isDark ? "text-blue-400" : "text-blue-600"}`}
+                >
+                  Clear search
+                </button>
+              )}
             </div>
           ) : (
-            <table className="w-full border-collapse text-left text-sm">
-              <thead
-                className={`${isDark ? "bg-gray-900 text-gray-400" : "bg-gray-50 text-gray-600"} uppercase text-xs font-semibold`}
-              >
-                <tr>
-                  {/* ১. ইনডেক্স এর জন্য হেডার যোগ করা হয়েছে */}
-                  <th className="p-4 w-16 text-center">#</th>
-                  <th className="p-4">Transaction ID</th>
-                  <th className="p-4">Contest Title</th>
-                  <th className="p-4">Amount</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Date</th>
-                </tr>
-              </thead>
-              <tbody
-                className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-200"}`}
-              >
-                {payments.map((payment, index) => (
-                  <tr
-                    key={payment._id}
-                    className={`hover:${isDark ? "bg-gray-750" : "bg-gray-50/50"} transition-colors`}
-                  >
-                    {/* ২. ডাইনামিক সিরিয়াল নম্বর যা পেজ পরিবর্তনের সাথে আপডেট হবে */}
-                    <td className="p-4 text-center font-medium text-gray-500">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td className="p-4 font-mono text-xs font-medium text-blue-500">
-                      {payment.transactionId}
-                    </td>
-                    <td className="p-4 font-medium">
-                      {/* ডাটাবেজ অবজেক্ট অনুযায়ী 'contestTitle' ব্যবহার করা হয়েছে */}
-                      {payment.contestTitle || "N/A"}
-                    </td>
-                    <td className="p-4 capitalize">
-                      {payment.amount} {payment.currency || "usd"}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
-                          payment.paymentStatus?.toLowerCase() === "success" ||
-                          payment.paymentStatus?.toLowerCase() === "paid"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                        }`}
-                      >
-                        {payment.paymentStatus || "Pending"}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right text-gray-500">
-                      {payment.paidAt?.$date || payment.paidAt
-                        ? new Date(
-                            payment.paidAt?.$date || payment.paidAt,
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            /*
+              MOBILE SCROLL:
+              - outer div is overflow-x-auto → enables horizontal scroll on small screens
+              - inner table has min-w-[700px] → prevents column squishing / overlap
+              - No content overlap on any screen size
+            */
+            <div className="overflow-x-auto">
+              <PaymentsTable
+                isDark={isDark}
+                payments={payments}
+                StatusBadge={StatusBadge}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                formDate={formatDate}
+              />
+            </div>
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {!isLoading && totalPages > 1 && (
+        {/* ── Pagination ── */}
+        {totalPages > 1 && (
           <Pagination
             page={currentPage}
             totalPages={totalPages}
