@@ -4,7 +4,7 @@ import Pagination from "@/Componets/Shared/Pagination";
 import MyContestSkeleton from "@/Componets/Skeltons/MyContestSkeleton";
 import useMyJoinContest from "@/Componets/utils/hooks/useMyJoinContest";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TbSearch,
   TbX,
@@ -60,7 +60,7 @@ const MyContestPage = () => {
     itemsPerPage,
   );
 
-  console.log("cotests", contests);
+  // console.log("cotests", contests);
 
   const totalPages = Math.ceil((meta?.total || 0) / itemsPerPage);
 
@@ -73,8 +73,6 @@ const MyContestPage = () => {
     setSearchTerm("");
     setCurrentPage(1);
   };
-
-  if (isLoading) return <MyContestSkeleton />;
 
   // ── Derived stats ──
   const totalSpent = contests.reduce(
@@ -196,7 +194,9 @@ const MyContestPage = () => {
               : "bg-white border-slate-200"
           }`}
         >
-          {contests.length === 0 ? (
+          {isLoading ? (
+            <MyContestSkeleton isDark={isDark} />
+          ) : contests.length === 0 ? (
             /* ── Empty state ── */
             <div className="py-16 flex flex-col items-center gap-3">
               <div

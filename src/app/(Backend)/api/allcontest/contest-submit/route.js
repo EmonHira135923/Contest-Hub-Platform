@@ -1,6 +1,8 @@
 import { getPayments } from "@/app/(Backend)/lib/dbConnect";
+import { logTracking } from "@/app/(Backend)/lib/logTracking";
 import { verifyCreator } from "@/app/(Backend)/middlewares/IsCreator";
 import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
+import { ObjectId } from "mongodb"; // 🟢 আইডি ম্যাচিং ফিক্সের জন্য প্রয়োজনীয়
 
 export async function PUT(request) {
   try {
@@ -15,7 +17,7 @@ export async function PUT(request) {
 
     // ২. ফ্রন্টএন্ড থেকে পাঠানো ডাটা রিসিভ করা
     const body = await request.json();
-    const { contestId, submissionLink, submissionNotes } = body;
+    const { contestId, submissionLink, submissionNotes, trackingId } = body;
 
     if (!contestId || !submissionLink) {
       return Response.json(
@@ -26,22 +28,42 @@ export async function PUT(request) {
 
     const paymentsCollection = await getPayments();
 
-    // ৩. নির্দিষ্ট ইউজারের পেইড করা পেমেন্ট ডকুমেন্টে স্ট্যাটাস, লিংক ও নোটস আপডেট করা
-    const result = await paymentsCollection.updateOne(
-      {
-        contestId: contestId,
-        customer_email: user.email,
-        paymentStatus: "paid",
-      },
-      {
-        $set: {
-          contestSubmissionStatus: "submitted",
-          submissionLink: submissionLink.trim(),
-          submissionNotes: submissionNotes ? submissionNotes.trim() : "", // 📝 নোটস এখানে সেভ হবে
-          submittedAt: new Date(),
+    // 🟢 ফিক্সড কুয়েরি ফিল্টার: ডাটাবেজের contestId অবজেক্ট নাকি স্ট্রিং—উভয় ফরম্যাটই চেক করবে
+    const query = {
+      paymentStatus: "paid",
+      customer_email: user.email,
+      $or: [
+        { contestId: contestId },
+        {
+          contestId: ObjectId.isValid(contestId)
+            ? new ObjectId(contestId)
+            : contestId,
         },
+      ],
+    };
+
+    // ফ্রন্টএন্ড থেকে trackingId পাঠানো হলে তা কুয়েরিতে যুক্ত হবে
+    if (trackingId) {
+      query.trackingId = trackingId;
+    }
+
+    // ৩. নির্দিষ্ট ইউজারের পেইড করা পেমেন্ট ডকুমেন্টে স্ট্যাটাস, লিংক ও নোটস আপডেট করা
+    const result = await paymentsCollection.updateOne(query, {
+      $set: {
+        contestSubmissionStatus: "submitted",
+        submissionLink: submissionLink.trim(),
+        submissionNotes: submissionNotes ? submissionNotes.trim() : "", // 📝 নোটস এখানে সেভ হবে
+        submittedAt: new Date(),
       },
-    );
+    });
+
+    if (trackingId && result.matchedCount > 0) {
+      await logTracking(
+        trackingId,
+        "Payment Confirmed",
+        "Your payment is successful. Waiting for courier pickup.",
+      );
+    }
 
     if (result.matchedCount === 0) {
       return Response.json(
@@ -94,7 +116,7 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
 
-    // পেজিনেশনের জন্য প্যারামিটার নেওয়া (অপশনাল কিন্তু বেস্ট প্র্যাকটিস)
+    // পেজিনেশনের জন্য প্যারামিটার নেওয়া (অপশনাল কিন্তু বেস্ট প্র্যাকটিস)
     const page = Math.max(Number(searchParams.get("page") || 1), 1);
     const limit = Math.max(Number(searchParams.get("limit") || 10), 1);
     const skip = (page - 1) * limit;
@@ -106,10 +128,7 @@ export async function GET(request) {
       contestSubmissionStatus: "submitted",
     };
 
-    // আপনি যদি চান লগইন করা ইউজার শুধুমাত্র নিজের সাবমিশন দেখবে, তাহলে নিচের লাইনটি আনকমেন্ট করুন:
-    // filter.customer_email = user.email;
-
-    // ৩. ডাটাবেজ থেকে কাউন্ট ও ডেটা কুয়েরি করা
+    // ৩. ডাটাবেজ থেকে কাউন্ট ও ডেটা কুয়েরি করা
     const totalCount = await paymentsCollection.countDocuments(filter);
     const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
 

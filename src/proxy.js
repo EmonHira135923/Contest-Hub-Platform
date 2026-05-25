@@ -2,19 +2,15 @@ import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 
 const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET_KEY || "");
+
+// 🟢 ফিক্সড: ট্রেইলিং স্ল্যাশ (/) গুলো বাদ দেওয়া হয়েছে
 const privateRoutes = [
   "/leaderboard",
   "/dashboard",
   "/profile",
-  "/all-contests/",
-  "/payment/",
+  "/all-contests",
+  "/payment",
 ];
-
-const clearCustomAuthCookies = (response) => {
-  response.cookies.delete("accessToken");
-  response.cookies.delete("refreshToken");
-  return response;
-};
 
 export async function proxy(request) {
   const reqPath = request.nextUrl.pathname;
@@ -41,9 +37,21 @@ export async function proxy(request) {
 
   const isAuthenticated = hasValidAccessToken || Boolean(nextAuthToken);
   const isAuthRoute = reqPath.startsWith("/auth/");
-  const isPrivateRoute = privateRoutes.some((route) =>
-    reqPath.startsWith(route),
+
+  // 🟢 ফিক্সড রাউট ম্যাচিং লজিক
+  const isPrivateRoute = privateRoutes.some(
+    (route) => reqPath === route || reqPath.startsWith(`${route}/`),
   );
+
+  // 💡 গুরুত্বপূর্ণ ফিক্স: যদি ইউজার পেমেন্ট সাকসেস বা ক্যান্সেল পেজে ব্যাক করে,
+  // তাকে জোর করে লগইনে পাঠানোর আগে সেশন রিলোডের সুযোগ দিন (NextResponse.next() করুন)
+  if (
+    (reqPath.startsWith("/payment/success") ||
+      reqPath.startsWith("/payment/cancel")) &&
+    !isAuthenticated
+  ) {
+    return NextResponse.next();
+  }
 
   if (isAuthenticated && isAuthRoute) {
     const response = NextResponse.redirect(dashboardUrl);
@@ -65,6 +73,12 @@ export async function proxy(request) {
 
   return NextResponse.next();
 }
+
+const clearCustomAuthCookies = (response) => {
+  response.cookies.delete("accessToken");
+  response.cookies.delete("refreshToken");
+  return response;
+};
 
 export const config = {
   matcher: [

@@ -4,7 +4,7 @@ import Pagination from "@/Componets/Shared/Pagination";
 import PaymentTableSkeleton from "@/Componets/Skeltons/PaymentSkelton";
 import useMyPayments from "@/Componets/utils/hooks/useMyPayments";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   TbSearch,
   TbReceipt2,
@@ -72,11 +72,11 @@ const Mypaymentpage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { payments, meta, isLoading } = useMyPayments(
-    searchTerm,
-    currentPage,
-    itemsPerPage,
-  );
+  const {
+    payments = [],
+    meta,
+    isLoading,
+  } = useMyPayments(searchTerm, currentPage, itemsPerPage);
 
   const totalPages = Math.ceil((meta?.total || 0) / itemsPerPage);
 
@@ -90,18 +90,22 @@ const Mypaymentpage = () => {
     setCurrentPage(1);
   };
 
-  if (isLoading) return <PaymentTableSkeleton />;
-
   // ── Derived stats ──
-  const totalPaid = payments
-    .filter((p) => ["success", "paid"].includes(p.paymentStatus?.toLowerCase()))
-    .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+  const stats = useMemo(() => {
+    const totalPaid = payments
+      .filter((p) =>
+        ["success", "paid"].includes(p.paymentStatus?.toLowerCase()),
+      )
+      .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
 
-  const paidCount = payments.filter((p) =>
-    ["success", "paid"].includes(p.paymentStatus?.toLowerCase()),
-  ).length;
+    const paidCount = payments.filter((p) =>
+      ["success", "paid"].includes(p.paymentStatus?.toLowerCase()),
+    ).length;
 
-  const pendingCount = payments.length - paidCount;
+    const pendingCount = payments.length - paidCount;
+
+    return { totalPaid, paidCount, pendingCount };
+  }, [payments]);
 
   const formatDate = (raw) => {
     if (!raw) return "N/A";
@@ -137,7 +141,7 @@ const Mypaymentpage = () => {
             </p>
           </div>
 
-          {/* Search */}
+          {/* Search Input Container */}
           <div
             className={`flex items-center gap-2 w-full sm:w-72 px-3 py-2 rounded-xl border transition-colors ${
               isDark
@@ -158,7 +162,11 @@ const Mypaymentpage = () => {
               }`}
             />
             {searchTerm && (
-              <button onClick={clearSearch} className="flex-shrink-0">
+              <button
+                onClick={clearSearch}
+                className="flex-shrink-0"
+                type="button"
+              >
                 <TbX
                   className={`w-4 h-4 ${isDark ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"}`}
                 />
@@ -178,21 +186,21 @@ const Mypaymentpage = () => {
           />
           <StatCard
             label="Total paid"
-            value={`$${totalPaid.toFixed(2)}`}
+            value={`$${stats.totalPaid.toFixed(2)}`}
             icon={TbCurrencyDollar}
             isDark={isDark}
             accent="bg-emerald-500"
           />
           <StatCard
             label="Successful"
-            value={paidCount}
+            value={stats.paidCount}
             icon={TbCircleCheck}
             isDark={isDark}
             accent="bg-green-500"
           />
           <StatCard
             label="Pending"
-            value={pendingCount}
+            value={stats.pendingCount}
             icon={TbClock}
             isDark={isDark}
             accent="bg-amber-500"
@@ -207,8 +215,12 @@ const Mypaymentpage = () => {
               : "bg-white border-slate-200"
           }`}
         >
-          {payments.length === 0 ? (
-            /* ── Empty state ── */
+          {/* 🎯 লোডিং ট্র্যাকিং ফিক্স: টাইপ করার সময় টেবিল যেন গায়েব না হয়ে স্কেলেটন ও ডেটার ডম ট্রি ঠিক রাখে */}
+          {isLoading ? (
+            <div className="p-4">
+              <PaymentTableSkeleton />
+            </div>
+          ) : payments.length === 0 ? (
             <div className="py-16 flex flex-col items-center gap-3">
               <div
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isDark ? "bg-slate-800" : "bg-slate-100"}`}
@@ -232,12 +244,6 @@ const Mypaymentpage = () => {
               )}
             </div>
           ) : (
-            /*
-              MOBILE SCROLL:
-              - outer div is overflow-x-auto → enables horizontal scroll on small screens
-              - inner table has min-w-[700px] → prevents column squishing / overlap
-              - No content overlap on any screen size
-            */
             <div className="overflow-x-auto">
               <PaymentsTable
                 isDark={isDark}

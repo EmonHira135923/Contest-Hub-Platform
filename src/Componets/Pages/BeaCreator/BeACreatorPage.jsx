@@ -83,7 +83,7 @@ const BeACreatorPage = () => {
       if (res.data.success) {
         setSubmitted(true);
         reset();
-        router.push("/profile")
+        router.push("/profile");
       }
     } catch (err) {
       toast.error(
@@ -104,8 +104,8 @@ const BeACreatorPage = () => {
     [
       "w-full px-3.5 py-2.5 text-sm rounded-xl border outline-none transition-all duration-150",
       isDark
-        ? "bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-indigo-500 focus:bg-white/8"
-        : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white",
+        ? "bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-indigo-500 focus:bg-white/8 [&>option]:bg-[#111120] [&>option]:text-white"
+        : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white [&>option]:bg-white [&>option]:text-gray-900",
       hasErr ? (isDark ? "!border-red-500/70" : "!border-red-400") : "",
     ].join(" ");
 
@@ -471,14 +471,14 @@ const BeACreatorPage = () => {
                     <div>
                       <label className={labelCls}>
                         <Globe size={12} className="inline mr-1 mb-0.5" />
-                        Online judge profile
+                        Online judge / Portfolio  profile
                       </label>
                       <input
                         {...register("ojLink", {
                           required: "OJ link is required",
                         })}
                         className={inputCls(!!errors.ojLink)}
-                        placeholder="Codeforces / LeetCode / StopStalk URL"
+                        placeholder="Codeforces / LeetCode / StopStalk / Portfolio URL"
                       />
                       <FieldError msg={errors.ojLink?.message} />
                       <p

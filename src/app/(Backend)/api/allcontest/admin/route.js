@@ -42,7 +42,7 @@ export async function GET(request) {
     if (searchQuery) {
       filter.$or = [
         { title: { $regex: searchQuery, $options: "i" } },
-        { payment: { $regex: searchQuery, $options: "i" } },
+        { paymentStatus: { $regex: searchQuery, $options: "i" } },
         { adminStatus: { $regex: searchQuery, $options: "i" } },
       ];
     }

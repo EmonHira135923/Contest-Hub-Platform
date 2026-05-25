@@ -50,6 +50,10 @@ export async function PATCH(request) {
       });
     }
 
+    const targetContest = await contestCollection.findOne({
+      _id: new ObjectId(contestId),
+    });
+
     // ৬. পেমেন্ট রেকর্ডের ডাটা অবজেক্ট তৈরি
     const paymentRecord = {
       contestId,
@@ -62,6 +66,8 @@ export async function PATCH(request) {
       trackingId: newTrackingId,
       paymentStatus: "paid",
       contestSubmissionStatus: "not-submitted",
+      deadline: targetContest?.deadline || null,
+      contestStatus: targetContest?.contestStatus || "active",
       paidAt: new Date(),
     };
 
@@ -75,7 +81,7 @@ export async function PATCH(request) {
     // এখানে logTracking ফাংশনটি আপনার ট্র্যাকিং সিস্টেমের টাইমলাইনে প্রথম এন্ট্রি দিবে
     await logTracking(
       newTrackingId,
-      "pending-pickup",
+      "Payment Confirmed",
       "Your payment is successful. Waiting for courier pickup.",
     );
     await paymentsCollection.insertOne(paymentRecord);

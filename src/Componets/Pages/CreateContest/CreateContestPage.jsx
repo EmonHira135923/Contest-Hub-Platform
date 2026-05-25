@@ -47,10 +47,13 @@ const CreateContestPage = () => {
         instruction: data.instruction,
         image: imageUrl,
         deadline: data.deadline,
+        isWinner: false, // নতুন ফিল্ড: বিজয়ী ঘোষণা করা হয়েছে কিনা
+        contestStatus: "active", // নতুন ফিল্ড: কনটেস্টের স্ট্যাটাস
+        contestSubmissionStatus: "not-submitted", // নতুন ফিল্ড: কনটেস্ট সাবমিশন স্ট্যাটাস
         participantsCount: 0,
-        status: "pending",
-        payment: "unpaid", // পেমেন্ট স্ট্যাটাস
-        creatorEmail: user?.email, // ক্রিয়েটরের ইমেল
+        adminStatus: "pending",
+        paymentStatus: "unpaid", // পেমেন্ট স্ট্যাটাস
+        creatorEmail: user?.email, // ক্রিয়েটরের ইমেল
         createdAt: new Date(),
       };
 
