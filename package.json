@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.9",
+    "aos": "^2.3.4",
     "axios": "^1.16.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",

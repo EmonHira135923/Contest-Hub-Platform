@@ -1,5 +1,6 @@
 import ClientReview from "@/Componets/Pages/Home/ClientReview";
 import CreatorAdveristement from "@/Componets/Pages/Home/CreatorAdveristement";
+import CreatorPackage from "@/Componets/Pages/Home/CreatorPackage";
 import HeroBanner from "@/Componets/Pages/Home/HeroBanner";
 import PopularContest from "@/Componets/Pages/Home/PopularContest";
 import WinnerAdvertisment from "@/Componets/Pages/Home/WinnerAdvertisment";
@@ -50,6 +51,7 @@ const Home = () => {
       <PopularContest />
       <WinnerAdvertisment />
       <CreatorAdveristement />
+      <CreatorPackage />
       <ClientReview />
     </div>
   );
