@@ -98,10 +98,8 @@ export async function POST(request) {
       participantsCount: 0,
       adminStatus: "pending", // অ্যাডমিন চেক করার জন্য
       paymentStatus: "unpaid", // পেমেন্ট স্ট্যাটাস (ক্রিয়েটর পেমেন্ট করলে 'paid' হবে)
-      contestSubmissionStatus: "not-submitted",
       creatorEmail: body.creatorEmail,
       contestStatus: "active", // কনটেস্টের স্ট্যাটাস (active, completed, cancelled)
-      isWinner: false, // বিজয়ী ঘোষণা করা হয়েছে কিনা
       createdAt: new Date(),
       updatedAt: new Date(),
     };

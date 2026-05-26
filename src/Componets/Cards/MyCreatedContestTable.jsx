@@ -1,10 +1,16 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { TbArrowUpRight } from "react-icons/tb";
 
-const MyCreatedContestTable = ({ isDark, contests, page, itemsPerPage, AdminBadge, PaymentBadge }) => {
+const MyCreatedContestTable = ({
+  isDark,
+  contests,
+  page,
+  itemsPerPage,
+  AdminBadge,
+  PaymentBadge,
+}) => {
   return (
     <div>
       <table className="w-full min-w-[900px] border-collapse text-left text-sm">
@@ -110,7 +116,7 @@ const MyCreatedContestTable = ({ isDark, contests, page, itemsPerPage, AdminBadg
 
                 {/* Payment badge */}
                 <td className="px-5 py-4">
-                  <PaymentBadge status={contest.payment} />
+                  <PaymentBadge status={contest.paymentStatus} />
                 </td>
 
                 {/* Admin status badge */}

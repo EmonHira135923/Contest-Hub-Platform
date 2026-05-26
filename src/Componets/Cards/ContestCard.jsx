@@ -13,7 +13,6 @@ import {
   ArrowUpRight,
   DollarSign,
   CreditCard,
-  ExternalLink,
 } from "lucide-react";
 import { MdOutlineLeaderboard, MdTaskAlt } from "react-icons/md";
 
@@ -22,6 +21,7 @@ const ContestCard = ({ contest, isDark }) => {
   const { user, loading: authLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const userEmail = user?.email;
+
   const [timeLeft, setTimeLeft] = useState(() => {
     if (!contest?.deadline) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -113,11 +113,15 @@ const ContestCard = ({ contest, isDark }) => {
   const canJoinContest = Boolean(userEmail && hasPurchased);
   const isCheckingPayment = authLoading || (!!userEmail && isPaymentLoading);
 
-  // 🚀 ডাটাবেজের পেমেন্ট কালেকশন থেকে ইন্ডিভিজুয়াল ইউজারের সাবমিশন স্ট্যাটাস
+  // 🚀 ডাটাবেজের পেমেন্ট কালেকশন থেকে ইন্ডিভিজুয়াল ইউজারের সাবমিশন ও উইনার স্ট্যাটাস
   const isUserSubmitted =
     userPaymentInfo?.contestSubmissionStatus === "submitted";
+
+  // রেজাল্ট পাবলিশের কন্ডিশন (প্যারেন্ট অবজেক্ট অথবা ইউজারের নিজস্ব পেমেন্ট ডাটায় উইনার ট্রু থাকলে)
   const isWinnerDeclared =
-    contest?.winnerDeclareStatus === "completed" || contest?.isWinnerDeclared;
+    contest?.winnerDeclareStatus === "completed" ||
+    contest?.isWinnerDeclared ||
+    userPaymentInfo?.isWinner === true;
 
   const timeBoxStyle = `flex flex-col items-center justify-center w-12 h-14 rounded-xl font-bold ${
     isDark ? "bg-indigo-600/20 text-indigo-400" : "bg-indigo-600 text-white"
@@ -286,10 +290,10 @@ const ContestCard = ({ contest, isDark }) => {
           <ArrowUpRight size={14} />
         </Link>
 
-        {/* ১. ক্রিয়েটর উইনার ডিক্লেয়ার করে ফেললে "See Your Result" বাটন আসবে (সবার উপরে অগ্রাধিকার পাবে) */}
+        {/* ১. রেজাল্ট পাবলিশ হলে বা ইউজার উইনার ডিক্লেয়ার হলে সবার আগে এই বাটন কাজ করবে (হায়ার প্রায়োরিটি) */}
         {isWinnerDeclared ? (
           <Link
-            href={`/leaderboard/${contest?._id}`}
+            href={`/leaderboard`}
             className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
               isDark
                 ? "bg-amber-600 text-white hover:bg-amber-500"
@@ -308,7 +312,7 @@ const ContestCard = ({ contest, isDark }) => {
             Checking...
           </button>
         ) : isUserSubmitted ? (
-          /* ২. ইউজার অলরেডি সাবমিট করে দিলে এই বাটনটি পুরোপুরি 'disabled' থাকবে এবং কোথাও নিয়ে যাবে না */
+          /* ২. রেজাল্ট এখনো পাবলিশ হয়নি কিন্তু ইউজার সাবমিট করে রেখেছে, তখন এই বাটন দেখাবে */
           <button
             type="button"
             disabled
@@ -321,6 +325,7 @@ const ContestCard = ({ contest, isDark }) => {
             Result Pending
           </button>
         ) : isClosed ? (
+          /* ৩. কন্টেস্ট ক্লোজড এবং ইউজার সাবমিটও করেনি */
           <button
             disabled
             className="flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-gray-500 text-gray-300 cursor-not-allowed"
@@ -328,6 +333,7 @@ const ContestCard = ({ contest, isDark }) => {
             Closed
           </button>
         ) : canJoinContest ? (
+          /* ৪. কন্টেস্ট রানিং এবং পেমেন্ট ডান, এখন সাবমিট করতে পারবে */
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
@@ -341,6 +347,7 @@ const ContestCard = ({ contest, isDark }) => {
             <MdTaskAlt size={14} />
           </button>
         ) : (
+          /* ৫. নতুন ইউজারদের জন্য জয়েন বাটন */
           <Link
             href={`/payment/${contest?._id}`}
             className={`flex-1 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
@@ -359,7 +366,7 @@ const ContestCard = ({ contest, isDark }) => {
         <ContestEntryModal
           contest={contest}
           isOpen={isModalOpen}
-          userEmail={userEmail} // 🎯 সঠিক ইমেল পাস করা হলো ট্র্যাকিংয়ের জন্য
+          userEmail={userEmail}
           onClose={() => setIsModalOpen(false)}
         />
       )}

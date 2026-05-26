@@ -1,5 +1,7 @@
 import { getAllContests, getPayments } from "@/app/(Backend)/lib/dbConnect";
-import { ObjectId } from "mongodb"; // 👈 ObjectId ইম্পোর্ট করতে হবে
+import { verifyCreator } from "@/app/(Backend)/middlewares/IsCreator";
+import { verifyToken } from "@/app/(Backend)/middlewares/verifyToken";
+import { ObjectId } from "mongodb";
 
 export async function PUT(request) {
   try {
@@ -100,6 +102,7 @@ export async function PUT(request) {
           winner: {
             email: winnerEmail,
             declaredAt: new Date(),
+            prize: contest.prize, // প্রাইজ ইনফো কনটেস্ট ডক থেকে নেওয়া হচ্ছে
           },
         },
       },

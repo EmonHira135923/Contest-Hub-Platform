@@ -17,8 +17,49 @@ import {
   CreditCard,
   ChevronDown,
   ChevronUp,
+  Terminal,
+  FileText,
 } from "lucide-react";
 import { MdTaskAlt, MdOutlineLeaderboard } from "react-icons/md";
+
+// 📝 কোডফোর্সেস/হ্যাকারর‍্যাংক স্টাইলে ক্লিন টেক্সট এবং ইনস্ট্রাকশন রেন্ডারার কম্পোনেন্ট
+const DynamicInstructionRenderer = ({ text, isDark }) => {
+  if (!text)
+    return <p className="text-sm opacity-60">No instructions provided.</p>;
+
+  // যদি টেক্সটে \n বা \n১. বা প্লেইন টেক্সট ব্রেক থাকে, সেগুলোকে স্প্লিট করে ক্লিন অ্যারে তৈরি করা
+  const paragraphs = text
+    .split(/\\n\d*\.?|\\n|\n/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((para, index) => {
+        // প্রথম লাইনটিকে একটু হাইলাইট করা বা নরমাল বয়লারপ্লেট ক্লিনিং
+        const cleanPara = para.replace(/^\d+\.\s*/, ""); // যদি শুরুর দিকে কোনো সংখ্যা থাকে তা রিমুভ করা
+        return (
+          <div key={index} className="flex gap-3 items-start group">
+            <div
+              className={`mt-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold ${
+                isDark
+                  ? "bg-indigo-500/10 text-indigo-400"
+                  : "bg-indigo-50 text-indigo-600"
+              }`}
+            >
+              {index + 1}
+            </div>
+            <p
+              className={`text-base leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}
+            >
+              {cleanPara}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const ExpandableText = ({ text, isDark }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -102,9 +143,11 @@ const Detailspage = ({ contest }) => {
     setIsModalOpen(true);
   };
 
-  // গ্লোবাল উইনার কন্ডিশন (সবার জন্য একই থাকবে)
+  // 🏆 গ্লোবাল উইনার কন্ডিশন (প্যারেন্ট অবজেক্ট বা ইউজারের অবজেক্টে ট্রু থাকলে বাটন আনলক হবে)
   const isWinnerDeclared =
-    contest?.winnerDeclareStatus === "completed" || contest?.isWinnerDeclared;
+    contest?.winnerDeclareStatus === "completed" ||
+    contest?.isWinnerDeclared ||
+    userPaymentInfo?.isWinner === true;
 
   return (
     <div
@@ -118,6 +161,7 @@ const Detailspage = ({ contest }) => {
           <ArrowLeft size={16} /> Back to all contests
         </Link>
 
+        {/* 📋 মেইন কন্টেস্ট ব্যানার ও মেটা ড্যাশবোর্ড */}
         <div
           className={`rounded-3xl border overflow-hidden shadow-xl ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
         >
@@ -213,13 +257,14 @@ const Detailspage = ({ contest }) => {
           </div>
         </div>
 
+        {/* 💻 মিডল সেকশন: ডেসক্রিপশন এবং হ্যাকারর‍্যাংক স্টাইল ইনস্ট্রাকশন রেন্ডারার */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2 space-y-8">
             <div
               className={`p-6 md:p-8 rounded-3xl border shadow-sm ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
             >
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                <FileText size={20} className="text-indigo-500" />
                 About The Contest
               </h2>
               <ExpandableText text={contest?.description} isDark={isDark} />
@@ -228,19 +273,23 @@ const Detailspage = ({ contest }) => {
             <div
               className={`p-6 md:p-8 rounded-3xl border shadow-sm ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
             >
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+              <h2 className="text-xl font-bold mb-5 flex items-center gap-2">
+                <Terminal size={20} className="text-indigo-500" />
                 Execution Phases & Instructions
               </h2>
-              <ExpandableText text={contest?.instruction} isDark={isDark} />
+              {/* 🛠️ এখানে ডাইনামিক ফিল্টারিং টাস্ক কল করা হয়েছে */}
+              <DynamicInstructionRenderer
+                text={contest?.instruction}
+                isDark={isDark}
+              />
             </div>
           </div>
 
+          {/* ⚡ ডানদিকের স্টিকি অ্যাকশন উইজেট */}
           <div className="sticky top-6 space-y-6">
             <div
               className={`p-6 rounded-3xl border text-center space-y-4 shadow-md ${isDark ? "bg-[#11111a] border-white/5" : "bg-white border-slate-100"}`}
             >
-              {/* পেমেন্ট করা হয়ে গেলে, সাবমিট করলে বা উইনার ডিক্লেয়ার হলে Registration Cost হাইড হবে */}
               {!hasPurchased && !isUserSubmitted && !isWinnerDeclared && (
                 <div>
                   <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
@@ -254,11 +303,11 @@ const Detailspage = ({ contest }) => {
                 </div>
               )}
 
-              {/* 🔘 কন্ডিশনাল অ্যাকশন বাটন সেকশন */}
+              {/* 🔘 কন্ডিশনাল অ্যাকশন বাটন সেকশন (ডাটাবেজ সিঙ্কড) */}
               {isWinnerDeclared ? (
-                /* ১. ক্রিয়েটর উইনার ডিক্লেয়ার করলে "See Your Result" লেখা সহ লিডারবোর্ড বাটন (শীর্ষ অগ্রাধিকার) */
+                /* ১. রেজাল্ট ডিক্লেয়ার হয়ে গেলে সরাসরি লিডারবোর্ড বাটন (টপ প্রায়োরিটি) */
                 <Link
-                  href={`/leaderboard/${contest?._id}`}
+                  href={`/leaderboard`}
                   className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
                     isDark
                       ? "bg-amber-600 text-white hover:bg-amber-500"
@@ -269,7 +318,7 @@ const Detailspage = ({ contest }) => {
                   See Your Result
                 </Link>
               ) : isCheckingPayment ? (
-                /* ২. পেমেন্ট ভেরিফিকেশন লোডিং স্টেট */
+                /* ২. পেমেন্ট লোডিং স্ট্যাটাস */
                 <button
                   type="button"
                   disabled
@@ -279,7 +328,7 @@ const Detailspage = ({ contest }) => {
                   Checking status...
                 </button>
               ) : isUserSubmitted ? (
-                /* ৩. ইউজার সাবমিট করে দিলে এই বাটনটি লকড থাকবে এবং কোথাও নিয়ে যাবে না */
+                /* ৩. ইউজার সাবমিট করে দেওয়ার পর ইভালুয়েশন বাটন */
                 <button
                   type="button"
                   disabled
@@ -292,7 +341,7 @@ const Detailspage = ({ contest }) => {
                   Result Pending
                 </button>
               ) : hasPurchased ? (
-                /* ৪. পেমেন্ট ভেরিফাইড এবং সাবমিশন বাকি থাকলে */
+                /* ৪. পেমেন্ট ভেরিফাইড এবং সাবমিশন উইন্ডো ওপেন থাকলে */
                 <button
                   type="button"
                   onClick={handleOpenModal}
@@ -307,7 +356,7 @@ const Detailspage = ({ contest }) => {
                   {isClosed ? "Registration Closed" : "Submit Contest"}
                 </button>
               ) : (
-                /* ৫. একদম নতুন ইউজার হলে "Pay & Join Now" বাটন */
+                /* ৫. গেটওয়ে পেমেন্ট লিংক */
                 <Link
                   href={`/payment/${contest?._id}`}
                   className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
@@ -322,12 +371,12 @@ const Detailspage = ({ contest }) => {
               )}
 
               <p className="text-[11px] text-slate-500 leading-normal">
-                {isClosed
-                  ? "This competition has reached its submission deadline."
-                  : isWinnerDeclared
-                    ? "The official results for this contest have been declared. Check the leaderboard above."
-                    : isUserSubmitted
-                      ? "Your assignment is under evaluation. Once the creator selects a winner, results will be live."
+                {isWinnerDeclared
+                  ? "The official results for this contest have been declared. Check the leaderboard above."
+                  : isUserSubmitted
+                    ? "Your assignment is under evaluation. Once the creator selects a winner, results will be live."
+                    : isClosed
+                      ? "This competition has reached its submission deadline."
                       : "Secured transactions. Slots are allocated dynamically upon registration."}
               </p>
             </div>
