@@ -254,6 +254,7 @@ npm start
 | `/dashboard/manage-mypayments` | User | Payment history page |
 | `/dashboard/manage-mycontest` | Creator/User | My contest list |
 | `/dashboard/my-created` | Creator | Creator contest list |
+| `/dashboard/my-winning` | Winning Contest for All | Winning contest list |
 | `/dashboard/submitted-tasks` | Creator | Submitted tasks page |
 | `/dashboard/add-user` | Admin | Add user page |
 | `/dashboard/manage-contact` | Admin | Contact submissions page |
@@ -282,6 +283,7 @@ npm start
 | GET | `/api/allcontest/creator` | Creator contest listing | Creator |
 | GET | `/api/allcontest/creator/[id]` | Get creator contest by ID | Creator |
 | GET | `/api/allcontest/admin` | Admin contest review list | Admin |
+| GET | `/api/allcontest/winningContest` | Winner contest review list | Winner |
 | GET/PATCH/DELETE | `/api/allcontest/admin/[id]` | Admin contest operations | Admin |
 | GET/PUT | `/api/allcontest/contest-submit` | Creator submission management | Creator |
 | PUT | `/api/allcontest/contest-submit/winner-declare` | Declare contest winner | Creator |
