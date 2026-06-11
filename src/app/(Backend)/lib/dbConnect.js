@@ -48,3 +48,8 @@ export const getTracking = async () => {
   const database = await connectDB();
   return database.collection("Tracking");
 };
+
+export const getContact = async () => {
+  const database = await connectDB();
+  return database.collection("Contact");
+};

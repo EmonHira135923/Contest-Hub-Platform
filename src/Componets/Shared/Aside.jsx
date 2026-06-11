@@ -117,6 +117,18 @@ const Aside = ({ collapsed, isDark, mobileOpen, setMobileOpen }) => {
             },
           ],
         },
+        {
+          label: "Manage Contact ",
+          icon: CheckCircle2,
+          isGroup: true,
+          children: [
+            {
+              label: "All Contact ",
+              icon: CheckCircle2,
+              href: "/dashboard/manage-contact",
+            },
+          ],
+        },
       ];
     }
 
