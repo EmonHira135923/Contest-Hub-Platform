@@ -14,31 +14,41 @@ const LINKS = {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
-  Company: [
-    { label: "About Us", href: "/about" },
-    { label: "Blog", href: "/blog" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-  ],
   Support: [
     { label: "Help Center", href: "/help" },
-    { label: "Contact Us", href: "/contact" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
   ],
 };
 
 const SOCIALS = [
-  { icon: <FaXTwitter size={14} />, href: "#" },
-  { icon: <FaLinkedinIn size={14} />, href: "#" },
-  { icon: <FaYoutube size={14} />, href: "#" },
-  { icon: <FaGithub size={14} />, href: "#" },
+  {
+    icon: <FaXTwitter size={14} />,
+    target: "_blank",
+    href: "https://x.com/hira_bd",
+  },
+  {
+    icon: <FaLinkedinIn size={14} />,
+    target: "_blank",
+    href: "https://www.linkedin.com/in/emon135923",
+  },
+  {
+    icon: <FaYoutube size={14} />,
+    target: "_blank",
+    href: "https://www.youtube.com/@emonhira6348",
+  },
+  {
+    icon: <FaGithub size={14} />,
+    target: "_blank",
+    href: "https://github.com/EmonHira135923",
+  },
 ];
 
 export default function Footer() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const pathName = usePathname();
+
   if (pathName.startsWith("/auth")) return null;
   if (pathName.startsWith("/dashboard")) return null;
 
@@ -85,6 +95,8 @@ export default function Footer() {
               <a
                 key={i}
                 href={s.href}
+                target={s.target}
+                rel="noopener noreferrer"
                 className={`w-9 h-9 rounded-[9px] border flex items-center justify-center transition-all ${
                   isDark
                     ? "border-white/[0.09] text-[#6b5f8a] hover:border-violet-500/40 hover:text-violet-400 hover:bg-violet-900/20"
