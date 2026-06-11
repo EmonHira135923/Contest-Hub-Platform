@@ -21,7 +21,7 @@ export async function GET(request) {
     const cookieStore = await cookies();
     const token = cookieStore.get("accessToken")?.value;
 
-    console.log("🔥 ACCESS TOKEN FROM COOKIE:", token);
+    // console.log("🔥 ACCESS TOKEN FROM COOKIE:", token);
 
     if (!token) {
       return Response.json(
@@ -34,7 +34,7 @@ export async function GET(request) {
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET_KEY);
-      console.log("✅ TOKEN DECODED:", decoded);
+      // console.log("✅ TOKEN DECODED:", decoded);
     } catch (err) {
       return Response.json(
         { success: false, message: "Invalid or expired token" },
@@ -48,7 +48,7 @@ export async function GET(request) {
     });
 
     if (!user) {
-      console.log("❌ USER NOT FOUND FOR ID:", decoded.id);
+      // console.log("❌ USER NOT FOUND FOR ID:", decoded.id);
       return Response.json(
         { success: false, message: "User not found" },
         { status: 404 },
@@ -69,7 +69,7 @@ export async function GET(request) {
       { status: 200 },
     );
   } catch (error) {
-    console.log("💥 SERVER ERROR:", error.message);
+    // console.log("💥 SERVER ERROR:", error.message);
     return Response.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 },

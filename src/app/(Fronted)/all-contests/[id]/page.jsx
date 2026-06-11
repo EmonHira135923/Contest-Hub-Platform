@@ -57,7 +57,7 @@ const ContestDetailsPage = async ({ params }) => {
 
   const contest = await fetchContestDirect(id);
 
-  console.log("ContestDetailsPage render:", contest);
+  // console.log("ContestDetailsPage render:", contest);
 
   if (!contest) {
     return (

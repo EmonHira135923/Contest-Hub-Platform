@@ -18,7 +18,7 @@ export async function generateMetadata() {
       const { payload } = await jwtVerify(token, secret);
       role = payload?.role || "user";
     } catch (error) {
-      console.log("Metadata JWT Error:", error);
+      // console.log("Metadata JWT Error:", error);
     }
   }
 

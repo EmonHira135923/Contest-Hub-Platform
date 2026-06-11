@@ -10,7 +10,7 @@ export const verifyAdmin = async (request, verifiedUser = null) => {
 
     return user;
   } catch (error) {
-    console.log("ADMIN VERIFY ERROR:", error.message);
+    // console.log("ADMIN VERIFY ERROR:", error.message);
     return null;
   }
 };

@@ -10,7 +10,7 @@ export const verifyToken = async (request) => {
     const authSecret = getAuthSecret();
 
     if (!authSecret) {
-      console.log("VERIFY ERROR: NEXTAUTH_SECRET_KEY is not configured");
+      // console.log("VERIFY ERROR: NEXTAUTH_SECRET_KEY is not configured");
       return null;
     }
 
@@ -23,7 +23,7 @@ export const verifyToken = async (request) => {
         const { payload } = await jwtVerify(accessToken, secret);
         return payload;
       } catch (error) {
-        console.log("CUSTOM TOKEN VERIFY ERROR:", error.message);
+        // console.log("CUSTOM TOKEN VERIFY ERROR:", error.message);
       }
     }
 
@@ -49,7 +49,7 @@ export const verifyToken = async (request) => {
 
     return null;
   } catch (error) {
-    console.log("VERIFY ERROR:", error.message);
+    // console.log("VERIFY ERROR:", error.message);
     return null;
   }
 };

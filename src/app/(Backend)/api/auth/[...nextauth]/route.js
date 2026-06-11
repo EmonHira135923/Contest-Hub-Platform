@@ -47,7 +47,7 @@ const handler = NextAuth({
           }
           return true;
         } catch (error) {
-          console.log("Database error:", error);
+          // console.log("Database error:", error);
           return false;
         }
       }
@@ -61,7 +61,7 @@ const handler = NextAuth({
         const userCollection = await getUsers();
         const dbUser = await userCollection.findOne({ email: user.email });
 
-        console.log("user", dbUser);
+        // console.log("user", dbUser);
 
         if (dbUser) {
           token.id = dbUser._id.toString();

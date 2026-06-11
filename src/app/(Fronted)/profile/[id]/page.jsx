@@ -23,7 +23,7 @@ export async function generateMetadata() {
         userName = user.name;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
 

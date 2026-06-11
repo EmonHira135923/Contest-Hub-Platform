@@ -26,7 +26,7 @@ const LoginForm = ({ inputClass, isDark }) => {
     setLoading(true);
     try {
       const response = await axiosSecure.post("/api/auth/login", data);
-      console.log("Login Success:", response.data);
+      // console.log("Login Success:", response.data);
       toast.success("Login successful!");
       await reFetch();
       router.replace("/dashboard");

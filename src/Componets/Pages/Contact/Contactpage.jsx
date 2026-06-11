@@ -127,7 +127,7 @@ export default function Contactpage() {
           <p className="text-xs font-bold uppercase tracking-widest text-violet-600 mb-6">
             Send a Message
           </p>
-          <form onSubmit={handleSubmit((d) => console.log(d))}>
+          <form onSubmit={handleSubmit((data) => {})}>
             <input
               {...register("name")}
               placeholder="Full Name"

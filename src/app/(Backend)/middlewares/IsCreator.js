@@ -10,7 +10,7 @@ export const verifyCreator = async (request, verifiedUser = null) => {
 
     return user;
   } catch (error) {
-    console.log("CREATOR VERIFY ERROR:", error.message);
+    // console.log("CREATOR VERIFY ERROR:", error.message);
     return null;
   }
 };

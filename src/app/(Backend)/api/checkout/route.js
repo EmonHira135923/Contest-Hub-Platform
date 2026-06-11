@@ -62,11 +62,11 @@ export async function POST(req) {
     //   finalTrackingId,
     // );
 
-    console.log("Stripe payment", body);
+    // console.log("Stripe payment", body);
 
     return Response.json({ url: session.url });
   } catch (err) {
-    console.error("Stripe Error:", err.message);
+    // console.error("Stripe Error:", err.message);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }

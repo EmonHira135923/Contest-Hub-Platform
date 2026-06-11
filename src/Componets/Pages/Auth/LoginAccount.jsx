@@ -3,6 +3,7 @@ import Link from "next/link";
 import useTheme from "@/Componets/utils/hooks/useThemeValue";
 import SocialAccount from "./SocialAccount";
 import LoginForm from "@/Componets/Forms/LoginForm";
+import DemoCredential from "./DemoCrediantial";
 
 export default function SignInPage() {
   const { theme } = useTheme();
@@ -90,6 +91,8 @@ export default function SignInPage() {
           </div>
 
           <LoginForm inputClass={inputClass} isDark={isDark} />
+
+          <DemoCredential isDark={isDark} />
 
           {/* Divider */}
           <div className="relative py-4 text-center">
