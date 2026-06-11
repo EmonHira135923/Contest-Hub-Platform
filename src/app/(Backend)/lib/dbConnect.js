@@ -2,6 +2,10 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@contest-hub.pzeiozv.mongodb.net/?appName=Contest-Hub`;
 
+console.log("DB_USER =", process.env.DB_USER);
+console.log("DB_PASS =", process.env.DB_PASS);
+console.log("URI =", uri);
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,

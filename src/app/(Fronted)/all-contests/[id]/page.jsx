@@ -1,5 +1,4 @@
 import Detailspage from "@/Componets/Pages/All-Contests/Detailspage";
-import AuthGuard from "@/Componets/Shared/AuthGuard";
 import { ObjectId } from "mongodb";
 import { getAllContests } from "@/app/(Backend)/lib/dbConnect";
 
@@ -69,9 +68,7 @@ const ContestDetailsPage = async ({ params }) => {
   }
 
   return (
-    <AuthGuard>
       <Detailspage contest={contest} />
-    </AuthGuard>
   );
 };
 
