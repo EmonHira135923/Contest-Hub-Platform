@@ -195,6 +195,16 @@ Create a `.env` file with required values:
 | `STRIPE_SECRET_KEY` | Stripe secret key | Yes |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Yes |
 
+### Test Credentials
+Use these sample login credentials for role-based access during development:
+
+- Creator:
+  - Email: `user@gmail.com`
+  - Password: `123456Aa!`
+- Admin:
+  - Email: `admin@gmail.com`
+  - Password: `123456Aa!`
+
 ### Run Development Server
 ```bash
 npm run dev
@@ -280,6 +290,7 @@ npm start
 | GET/PATCH/DELETE | `/api/auth/register/users/[id]` | Manage user by ID | Admin |
 | POST | `/api/auth/invite-user` | Send invitation email | Admin |
 | GET/POST | `/api/allcontest` | Browse contests / create contest | Authenticated / Creator |
+| GET | `/api/leaderboard` | Winner | All Of User |
 | GET | `/api/allcontest/creator` | Creator contest listing | Creator |
 | GET | `/api/allcontest/creator/[id]` | Get creator contest by ID | Creator |
 | GET | `/api/allcontest/admin` | Admin contest review list | Admin |
