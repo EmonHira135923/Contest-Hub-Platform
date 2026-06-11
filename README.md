@@ -366,6 +366,7 @@ npm start
 
 ## Contributors
 - Project repository: https://github.com/EmonHira135923/Contest-Hub-Platform
+- Project LiveLink: https://contest-hub-platform.vercel.app
 
 ## License
 Not detected in project
