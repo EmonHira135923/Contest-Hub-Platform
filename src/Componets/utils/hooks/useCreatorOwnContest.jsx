@@ -2,13 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 import useAuth from "./useAuth";
 
-const useCreatorOwnContest = (search = "", page = 1) => {
+const useCreatorOwnContest = (search = "", page = 1, enabled = true) => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
 
   const { data, isLoading, error, refetch } = useQuery({
-    // The query triggers automatically whenever user.email, search, or page changes
-    queryKey: ["creatorContests", user?.email, search, page],
+    // The query triggers automatically whenever user.email, search, page, or enabled changes
+    queryKey: ["creatorContests", user?.email, search, page, enabled],
     queryFn: async () => {
       if (!user?.email) return null;
 
@@ -17,7 +17,7 @@ const useCreatorOwnContest = (search = "", page = 1) => {
       );
       return response.data;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && enabled,
   });
 
   return {

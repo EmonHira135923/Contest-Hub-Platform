@@ -2,13 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 import useAuth from "./useAuth";
 
-const useMyJoinContest = (search = "", page = 1, limit = 10) => {
+const useMyJoinContest = (search = "", page = 1, limit = 10, enabled = true) => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["my-contests", user?.email, search, page, limit],
-    enabled: !!user?.email,
+    queryKey: ["my-contests", user?.email, search, page, limit, enabled],
+    enabled: !!user?.email && enabled,
     queryFn: async () => {
       // URL থেকে ভুল কুয়েরি টেক্সট সরিয়ে params এর ভেতর অবজেক্ট হিসেবে পাঠানো হয়েছে
       const res = await axiosSecure.get("/api/payment-success", {

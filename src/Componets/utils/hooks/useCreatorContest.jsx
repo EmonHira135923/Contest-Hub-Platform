@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 
-const useCreatorContest = (search = "", page = 1) => {
+const useCreatorContest = (search = "", page = 1, enabled = true) => {
   const axiosSecure = useAxiosSecure();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["creator-contests", search, page],
+    queryKey: ["creator-contests", search, page, enabled],
+    enabled,
     queryFn: async () => {
       const res = await axiosSecure.get(
         `/api/allcontest/creator?search=${search}&page=${page}`,

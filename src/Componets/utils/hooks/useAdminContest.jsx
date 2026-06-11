@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 
-const useAdminContest = () => {
+const useAdminContest = (enabled = true) => {
   const axiosSecure = useAxiosSecure();
 
   const [page, setPage] = useState(1);
@@ -22,6 +22,7 @@ const useAdminContest = () => {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin-contests", page, search, adminStatus],
     queryFn: fetchContests,
+    enabled,
   });
 
   return {

@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 
-const useCreators = ({
-  search = "",
-  status = "",
-  district = "",
-  phone = "",
-  education = "",
-  page = 1,
-} = {}) => {
+const useCreators = (
+  {
+    search = "",
+    status = "",
+    district = "",
+    phone = "",
+    education = "",
+    page = 1,
+  } = {},
+  enabled = true,
+) => {
   const axiosSecure = useAxiosSecure();
 
   const {
@@ -20,8 +23,9 @@ const useCreators = ({
   } = useQuery({
     queryKey: [
       "creators",
-      { search, status, district, phone, education, page },
+      { search, status, district, phone, education, page, enabled },
     ],
+    enabled,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search) params.append("search", search);

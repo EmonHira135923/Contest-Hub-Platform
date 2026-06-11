@@ -3,11 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 
-const useAllSubmission = (page = 1, limit = 10) => {
+const useAllSubmission = (enabled = true, page = 1, limit = 10) => {
   const axiosSecure = useAxiosSecure();
 
   return useQuery({
-    queryKey: ["allSubmissions", page, limit],
+    queryKey: ["allSubmissions", enabled, page, limit],
+    enabled,
     queryFn: async () => {
       // ব্যাকএন্ডে অলরেডি কন্ডিশন হ্যান্ডেল করা আছে, তাই প্যারামিটার ক্লিন রাখা হলো
       const { data } = await axiosSecure.get(

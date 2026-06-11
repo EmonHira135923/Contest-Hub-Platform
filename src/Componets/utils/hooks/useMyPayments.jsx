@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 import useAuth from "./useAuth";
 
-const useMyPayments = (search = "", page = 1, limit = 10) => {
+const useMyPayments = (search = "", page = 1, limit = 10, enabled = true) => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
 
   const { data, isLoading, refetch } = useQuery({
     // Keep user.email in the queryKey so it refetches if the user changes
-    queryKey: ["my-payments", user?.email, search, page, limit],
-    enabled: !!user?.email, // Don't run the query until the user is logged in
+    queryKey: ["my-payments", user?.email, search, page, limit, enabled],
+    enabled: !!user?.email && enabled, // Don't run the query until the user is logged in
     queryFn: async () => {
       // Removed the email from the URL path since the backend handles it via token
       const res = await axiosSecure.get("/api/payment-success", {
