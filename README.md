@@ -1,385 +1,395 @@
-# Contest Hub Platform
+<div align="center">
 
-## Project Overview
-Contest Hub Platform is a modern full-stack contest management system built with Next.js App Router. It allows creators to publish contests, users to browse and participate, and admins to manage contests, users, and platform settings. The platform supports role-based dashboards, payment workflows, content submission, winner selection, and admin moderation.
+# 🏆 Contest Hub Platform
+
+**A Full-Stack Contest Management System**
+
+Publish contests, participate, submit entries, and manage everything through role-based dashboards for admins, creators, and users.
+
+[![Next.js](https://img.shields.io/badge/Next.js-App%20Router-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://contest-hub-platform.vercel.app)
+
+[Live Demo](https://contest-hub-platform.vercel.app) · [Repository](https://github.com/EmonHira135923/Contest-Hub-Platform) · [Report an Issue](https://github.com/EmonHira135923/Contest-Hub-Platform/issues)
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Folder Structure](#folder-structure)
+- [User Roles](#user-roles)
+- [Authentication Flow](#authentication-flow)
+- [Contest Lifecycle](#contest-lifecycle)
+- [Route Map](#route-map)
+- [API Reference](#api-reference)
+- [Database Collections](#database-collections)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Test Credentials](#test-credentials)
+- [Security](#security)
+- [Performance Optimizations](#performance-optimizations)
+- [Deployment](#deployment)
+- [Roadmap](#roadmap)
+- [Contributors](#contributors)
+- [License](#license)
+
+---
+
+## Overview
+
+Contest Hub Platform is a modern full-stack contest management system built with **Next.js App Router**. Creators publish contests, users browse and participate, and admins moderate the whole platform — all through dedicated, role-based dashboards.
+
+Core capabilities include:
+
+- 📢 Contest creation and admin approval workflow
+- 🔍 Public contest browsing, search, and filtering
+- 💳 Paid participation via Stripe checkout
+- 📝 Assignment submission and winner declaration
+- 📊 Role-specific analytics dashboards
+- 🔐 Secure, role-based authentication and access control
 
 ## Features
 
-### User Features
-- User registration via email/password
-- Social login with Google and GitHub
-- Browse approved contests
-- Search and filter contests by category
-- Join contests and make payments via Stripe
+<table>
+<tr><td width="50%" valign="top">
+
+**User**
+
+- Email/password registration & login
+- Social login (Google, GitHub)
+- Browse, search & filter approved contests
+- Join contests and pay via Stripe
 - Submit contest assignments
-- View personal dashboard with participation stats
-- Profile page with payment history and joined contest details
+- Personal dashboard with participation stats
+- Profile with payment & contest history
 
-### Contest Management Features
-- Creator contest creation flow
-- Contest categories, deadlines, prizes, and submission instructions
+**Contest Management**
+
+- Creator contest creation flow (category, deadline, prize, instructions)
 - Creator-owned contest listing
-- Admin review and approval workflow for contests
-- Creator submission review and winner declaration
-- Paid contest participant tracking and status updates
+- Admin review & approval workflow
+- Submission review & winner declaration
+- Paid participant tracking
 
-### Authentication Features
+**Authentication**
+
 - NextAuth social login (Google, GitHub)
-- Custom email/password login with JWT cookies
-- Access token and refresh token cookies
-- Role-based session payload and token enrichment
-- Authenticated profile endpoint
-- Secure logout endpoint
+- Custom JWT login with access/refresh cookies
+- Role-enriched session payload
+- Authenticated profile endpoint & secure logout
 
-### Dashboard Features
-- Multi-role dashboard for admin / creator / user
-- Role-specific analytics and cards
-- Admin platform snapshot with user, contest, creator analytics
-- Creator contest performance charts
-- User activity breakdown charts
-- Separate pages for dashboard management tasks
+</td><td width="50%" valign="top">
 
-### Admin Features
-- Manage all registered users
-- Grant/revoke roles
-- View full contest queue
-- Approve or reject creator contests
+**Dashboards & Analytics**
+
+- Multi-role dashboard (admin / creator / user)
+- Role-specific analytics cards
+- Recharts-powered pie & bar charts
+- Admin platform snapshot (users, contests, creators)
+- Creator performance charts
+
+**Admin**
+
+- Manage all users & roles
+- Approve/reject creator contests
 - Delete contests
 - Send invitation emails with secure token links
-- View platform contact submissions
-- Access admin-only API endpoints
+- View contact form submissions
 
-### Analytics Features
-- Recharts-powered charts for dashboard analytics
-- Role-specific pie and bar charts
-- Creator and admin analytics summaries
-- Payment, submission, and contest metrics
+**Platform**
 
-### Security Features
-- JWT-based authentication
-- Role verification middleware for admin and creator routes
-- Protected API endpoints with `verifyToken`, `verifyAdmin`, `verifyCreator`
-- HTTP-only cookies for token storage
-- Password hashing with bcrypt
-- Server-side session validation via NextAuth
-- Token expiration handling
+- Cloudinary image uploads
+- Nodemailer invitation & contact emails
+- Toast notifications (react-toastify)
+- Fully responsive Tailwind CSS UI
 
-### Notification Features
-- Invitation email sending via nodemailer
-- Email template generation for invitation links
-- Contact submission email capture
-- User-facing toast notifications (react-toastify)
+</td></tr>
+</table>
 
-### Responsive UI Features
-- Responsive layout using Tailwind CSS
-- Mobile-friendly dashboard and pages
-- Dynamic client-side theme values
-- Accessible navigation and forms
+## Tech Stack
 
-### Other Features
-- Cloudinary image upload support
-- Stripe payment integration
-- Contest search and pagination
-- Role-specific navigation
-- Support for creator invite workflow
-- Contact and help pages
+| Layer               | Technologies                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**        | Next.js App Router · React 19 · Tailwind CSS v4 · React Query · Recharts · Next Themes · React Hook Form · React Toastify · Framer Motion · React Icons |
+| **Backend**         | Next.js API Routes · Node.js · Stripe · Nodemailer · JWT · bcryptjs                                                                                     |
+| **Database**        | MongoDB (Node.js driver)                                                                                                                                |
+| **Auth**            | NextAuth · Google OAuth · GitHub OAuth · JWT · Email/Password                                                                                           |
+| **Other Libraries** | Cloudinary · `lucide-react` · `leaflet` / `react-leaflet` · `js-cookie` · `jose` (JWT verification) · Axios                                             |
+| **Deployment**      | Vercel                                                                                                                                                  |
 
-## Technology Stack
+## Architecture
 
-### Frontend
-- Next.js App Router
-- React 19
-- Tailwind CSS v4
-- React Query
-- Recharts
-- Next Auth
-- Next Themes
-- axios
-- react-hook-form
-- React Toastify
-- Framer Motion
-- React Icons
-
-### Backend
-- Next.js API routes
-- Node.js
-- Stripe
-- Nodemailer
-- JSON Web Token (JWT)
-- bcryptjs
-
-### Database
-- MongoDB
-- MongoDB Node driver
-
-### Authentication
-- NextAuth
-- Google OAuth
-- GitHub OAuth
-- JWT
-- Email/password auth
-
-### Deployment
-- Vercel
-
-### Additional Libraries
-- Cloudinary
-- `lucide-react`
-- `leaflet` / `react-leaflet`
-- `js-cookie`
-- date formatting via `Intl`
-- `jose` for JWT verification
-
-## Project Architecture
-- Frontend pages are under `src/app/(Fronted)`
-- Backend API routes are under `src/app/(Backend)/api`
-- Shared components and hooks are under `src/Componets`
-- Auth context and provider manage user session state and logout
+- Frontend pages live under `src/app/(Fronted)`
+- Backend API routes live under `src/app/(Backend)/api`
+- Shared components and hooks live under `src/Componets`
+- Auth context/provider manages session state and logout
 - Role-based rendering and route gating use `useRole()` and `AuthContext`
-- API requests use `useAxiosSecure()` for authenticated calls
-- Database connections and collections are centralized in `src/app/(Backend)/lib/dbConnect.js`
+- Authenticated requests go through `useAxiosSecure()`
+- Database access is centralized in `src/app/(Backend)/lib/dbConnect.js`
 
 ## Folder Structure
-- `src/app/`
-  - `(Fronted)/` — frontend pages and dashboard routes
-  - `(Backend)/` — API routes, middleware, backend utilities
-  - `page.jsx` — homepage
-- `src/Componets/`
-  - `Pages/` — page-level React components for dashboard, contests, auth
-  - `Shared/` — shared layout parts like navbar, footer, sidebar
-  - `Provider/` — auth and theme providers
-  - `utils/hooks/` — custom React hooks
-- `public/` — static assets and JSON data
-- `src/proxy.js` — proxy or helper file
-- `package.json` — dependencies and scripts
 
-## Installation Guide
+```text
+src/
+├── app/
+│   ├── (Fronted)/          # Frontend pages & dashboard routes
+│   ├── (Backend)/          # API routes, middleware, backend utilities
+│   └── page.jsx            # Homepage
+├── Componets/
+│   ├── Pages/               # Page-level components (dashboard, contests, auth)
+│   ├── Shared/               # Navbar, footer, sidebar
+│   ├── Provider/              # Auth and theme providers
+│   └── utils/hooks/            # Custom React hooks
+├── public/                  # Static assets & JSON data
+├── proxy.js                 # Proxy / helper file
+└── package.json
+```
+
+## User Roles
+
+| Role        | Description                                                         |
+| ----------- | ------------------------------------------------------------------- |
+| **User**    | Browses and joins contests, makes payments, submits entries         |
+| **Creator** | Creates and manages contests, reviews submissions, declares winners |
+| **Admin**   | Moderates the platform — users, contests, creators, and invitations |
+
+## Authentication Flow
+
+```text
+Login / Social Sign-In
+        │
+        ▼
+  Credential / OAuth Validation
+        │
+        ▼
+ JWT Issued (Access + Refresh Cookies)
+        │
+        ▼
+   Role Enrichment (jwt callback)
+        │
+        ▼
+Protected Route / API Validation
+        │
+        ▼
+  Access Granted / Denied
+```
+
+- NextAuth handles Google and GitHub OAuth; social logins insert or update users in MongoDB.
+- The `jwt` callback enriches the token with role, provider, phone, and image.
+- The `session` callback exposes auth state to the client.
+- Custom login (`/api/auth/login`) validates credentials and issues JWT access & refresh cookies.
+- Protected backend routes verify tokens via `verifyToken`, with `verifyAdmin` / `verifyCreator` for role-gated routes.
+- Logout clears auth cookies and redirects to login.
+
+## Contest Lifecycle
+
+```text
+Creator submits a contest (/create-contest)
+        → Admin reviews it (/dashboard/manage-contests)
+        → Approved contests appear in the public listing
+        → Users pay to join via Stripe checkout
+        → Paid users submit assignments
+        → Creator declares a winner after the deadline
+        → Status tracked via adminStatus, paymentStatus, contestStatus
+        → Winner selection sets isWinner on payments & updates contest metadata
+```
+
+## Route Map
+
+| Route                                  | Access        | Description                |
+| -------------------------------------- | ------------- | -------------------------- |
+| `/`                                    | Public        | Home page                  |
+| `/about`                               | Public        | About page                 |
+| `/all-contests`                        | Public        | Contest listing            |
+| `/all-contests/[id]`                   | Public        | Contest details            |
+| `/auth/login`                          | Public        | Login                      |
+| `/auth/signup`                         | Public        | Signup                     |
+| `/be-a-creator`                        | Public        | Creator onboarding         |
+| `/contact`                             | Public        | Contact page               |
+| `/leaderboard`                         | Public        | Leaderboard                |
+| `/privacy` · `/terms` · `/help`        | Public        | Policy & support pages     |
+| `/contest-arena`                       | Authenticated | Contest participation area |
+| `/payment/[id]`                        | Authenticated | Payment checkout           |
+| `/payment/success` · `/payment/cancel` | Authenticated | Payment result pages       |
+| `/profile` · `/profile/[id]`           | Authenticated | Profile pages              |
+| `/dashboard`                           | Authenticated | Shared dashboard entry     |
+| `/dashboard/manage-mypayments`         | User          | Payment history            |
+| `/dashboard/manage-mycontest`          | Creator/User  | My contests                |
+| `/dashboard/my-winning`                | All           | Winning contests           |
+| `/create-contest`                      | Creator       | Contest creation           |
+| `/dashboard/my-created`                | Creator       | Creator's contest list     |
+| `/dashboard/submitted-tasks`           | Creator       | Submitted tasks            |
+| `/dashboard/manage-users`              | Admin         | User management            |
+| `/dashboard/manage-contests`           | Admin         | Contest management         |
+| `/dashboard/manage-creator-contests`   | Admin         | Creator contest approval   |
+| `/dashboard/manage-creator`            | Admin         | Creator management         |
+| `/dashboard/add-user`                  | Admin         | Add user                   |
+| `/dashboard/manage-contact`            | Admin         | Contact submissions        |
+
+## API Reference
+
+### Auth
+
+| Method                 | Endpoint                        | Description                | Access                      |
+| ---------------------- | ------------------------------- | -------------------------- | --------------------------- |
+| `GET`/`POST`           | `/api/auth/[...nextauth]`       | NextAuth social auth       | Public                      |
+| `POST`                 | `/api/auth/login`               | Email/password login       | Public                      |
+| `POST`                 | `/api/auth/logout`              | Clear auth cookies         | Authenticated               |
+| `GET`                  | `/api/auth/myprofile`           | Get current user profile   | Authenticated               |
+| `POST`/`GET`           | `/api/auth/register`            | Register user / list users | Public (POST) · Admin (GET) |
+| `GET`/`PATCH`/`DELETE` | `/api/auth/register/users/[id]` | Manage a user by ID        | Admin                       |
+| `POST`                 | `/api/auth/invite-user`         | Send invitation email      | Admin                       |
+
+### Contests
+
+| Method                 | Endpoint                                        | Description               | Access                        |
+| ---------------------- | ----------------------------------------------- | ------------------------- | ----------------------------- |
+| `GET`/`POST`           | `/api/allcontest`                               | Browse / create contests  | Public (GET) · Creator (POST) |
+| `GET`                  | `/api/allcontest/creator`                       | Creator's contest listing | Creator                       |
+| `GET`                  | `/api/allcontest/creator/[id]`                  | Get creator contest by ID | Creator                       |
+| `GET`                  | `/api/allcontest/admin`                         | Admin contest review list | Admin                         |
+| `GET`/`PATCH`/`DELETE` | `/api/allcontest/admin/[id]`                    | Admin contest operations  | Admin                         |
+| `GET`/`PUT`            | `/api/allcontest/contest-submit`                | Manage submissions        | Creator                       |
+| `PUT`                  | `/api/allcontest/contest-submit/winner-declare` | Declare a winner          | Creator                       |
+| `GET`                  | `/api/allcontest/winningContest`                | Winning contest list      | Winner                        |
+| `GET`                  | `/api/leaderboard`                              | Leaderboard data          | Authenticated                 |
+| `GET`                  | `/api/popularcontest`                           | Popular contests          | Public                        |
+
+### Payments, Creators & Contact
+
+| Method        | Endpoint               | Description                          | Access        |
+| ------------- | ---------------------- | ------------------------------------ | ------------- |
+| `GET`/`PATCH` | `/api/payment-success` | Confirm payment / list user payments | Authenticated |
+| `GET`         | `/api/creator`         | List all creators                    | Admin         |
+| `GET`         | `/api/creator/[id]`    | Get creator by ID                    | Admin         |
+| `POST`        | `/api/contact`         | Contact form submission              | Public        |
+
+## Database Collections
+
+| Collection | Purpose                                                    |
+| ---------- | ---------------------------------------------------------- |
+| `users`    | User accounts, roles, profile data, OAuth provider info    |
+| `contests` | Contest metadata — status, creator, prize, deadline        |
+| `payments` | Payment records, submission status, tracking, winner flags |
+
+## Getting Started
 
 ### Prerequisites
+
 - Node.js
 - npm
 - MongoDB database
-- Vercel account for deployment
+- Vercel account (for deployment)
 
-### Clone Repository
+### Installation
+
 ```bash
 git clone https://github.com/EmonHira135923/Contest-Hub-Platform.git
 cd Contest-Hub-Platform
-```
-
-### Install Dependencies
-```bash
 npm install
-```
-
-### Configure Environment Variables
-Create a `.env` file with required values:
-
-| Variable | Description | Required |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | Base frontend/API URL | Yes |
-| `DB_USER` | MongoDB username | Yes |
-| `DB_PASS` | MongoDB password | Yes |
-| `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Cloudinary preset | Yes |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | Yes |
-| `CLOUDINARY_API_KEY` | Cloudinary API key | Yes |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret | Yes |
-| `EMAIL_PASS` | Email password for nodemailer | Yes |
-| `EMAIL_USER` | Email sender address | Yes |
-| `NEXTAUTH_SECRET_KEY` | NextAuth secret | Yes |
-| `NEXTAUTH_REFRESH_KEY` | JWT refresh secret | Yes |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Yes |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth secret | Yes |
-| `GITHUB_ID` | GitHub OAuth client ID | Yes |
-| `GITHUB_SECRET` | GitHub OAuth client secret | Yes |
-| `STRIPE_SECRET_KEY` | Stripe secret key | Yes |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Yes |
-
-### Test Credentials
-Use these sample login credentials for role-based access during development:
-
-- Creator:
-  - Email: `user@gmail.com`
-  - Password: `123456Aa!`
-- Admin:
-  - Email: `admin@gmail.com`
-  - Password: `123456Aa!`
-
-### Run Development Server
-```bash
 npm run dev
 ```
 
-### Build Production Version
+### Build & Run in Production
+
 ```bash
 npm run build
-```
-
-### Start Production Server
-```bash
 npm start
 ```
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | Public base URL for API and invitation links |
-| `DB_USER` | MongoDB user |
-| `DB_PASS` | MongoDB password |
-| `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Cloudinary upload preset |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Cloudinary secret |
-| `EMAIL_PASS` | Password for email sender account |
-| `EMAIL_USER` | Email address for sending invitations/notifications |
-| `NEXTAUTH_SECRET_KEY` | Secret for NextAuth and JWT signing |
-| `NEXTAUTH_REFRESH_KEY` | Refresh JWT signing secret |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `GITHUB_ID` | GitHub OAuth client ID |
-| `GITHUB_SECRET` | GitHub OAuth client secret |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+Create a `.env` file in the project root:
 
-## Route Summary
+```env
+# App
+NEXT_PUBLIC_API_URL=
 
-| Route | Access Level | Description |
-|---|---|---|
-| `/` | Public | Home page |
-| `/about` | Public | About page |
-| `/all-contests` | Public | Contest listing |
-| `/all-contests/[id]` | Public | Contest details |
-| `/auth/login` | Public | Login page |
-| `/auth/signup` | Public | Signup page |
-| `/be-a-creator` | Public | Creator onboarding |
-| `/contact` | Public | Contact page |
-| `/contest-arena` | Authenticated | Contest participation area |
-| `/create-contest` | Creator | Contest creation page |
-| `/dashboard` | Authenticated | Shared dashboard entry |
-| `/dashboard/manage-users` | Admin | User management page |
-| `/dashboard/manage-contests` | Admin | Contest management page |
-| `/dashboard/manage-creator-contests` | Admin | Creator contest approval |
-| `/dashboard/manage-creator` | Admin | Creator management page |
-| `/dashboard/manage-mypayments` | User | Payment history page |
-| `/dashboard/manage-mycontest` | Creator/User | My contest list |
-| `/dashboard/my-created` | Creator | Creator contest list |
-| `/dashboard/my-winning` | Winning Contest for All | Winning contest list |
-| `/dashboard/submitted-tasks` | Creator | Submitted tasks page |
-| `/dashboard/add-user` | Admin | Add user page |
-| `/dashboard/manage-contact` | Admin | Contact submissions page |
-| `/leaderboard` | Public | Leaderboard page |
-| `/payment/[id]` | Authenticated | Payment checkout page |
-| `/payment/success` | Authenticated | Payment success page |
-| `/payment/cancel` | Authenticated | Payment cancellation page |
-| `/profile` | Authenticated | Profile page |
-| `/profile/[id]` | Authenticated | Profile detail page |
-| `/privacy` | Public | Privacy policy page |
-| `/terms` | Public | Terms page |
-| `/help` | Public | Help page |
+# Database
+DB_USER=
+DB_PASS=
 
-## API Documentation
+# Cloudinary
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-| Method | Endpoint | Description | Authentication |
-|---|---|---|---|
-| GET/POST | `/api/auth/[...nextauth]` | NextAuth social auth API | N/A |
-| POST | `/api/auth/login` | Custom email/password login | N/A |
-| POST | `/api/auth/logout` | Logout and clear auth cookies | Authenticated |
-| GET | `/api/auth/myprofile` | Fetch current user profile | Authenticated |
-| POST/GET | `/api/auth/register` | Register user / admin get users list | Admin for GET |
-| GET/PATCH/DELETE | `/api/auth/register/users/[id]` | Manage user by ID | Admin |
-| POST | `/api/auth/invite-user` | Send invitation email | Admin |
-| GET/POST | `/api/allcontest` | Browse contests / create contest | Authenticated / Creator |
-| GET | `/api/leaderboard` | Winner | All Of User |
-| GET | `/api/allcontest/creator` | Creator contest listing | Creator |
-| GET | `/api/allcontest/creator/[id]` | Get creator contest by ID | Creator |
-| GET | `/api/allcontest/admin` | Admin contest review list | Admin |
-| GET | `/api/allcontest/winningContest` | Winner contest review list | Winner |
-| GET/PATCH/DELETE | `/api/allcontest/admin/[id]` | Admin contest operations | Admin |
-| GET/PUT | `/api/allcontest/contest-submit` | Creator submission management | Creator |
-| PUT | `/api/allcontest/contest-submit/winner-declare` | Declare contest winner | Creator |
-| PATCH/GET | `/api/payment-success` | Stripe payment confirmation / user payments | Authenticated |
-| GET | `/api/creator` | Admin list creators | Admin |
-| GET | `/api/creator/[id]` | Get creator by ID | Admin |
-| POST | `/api/contact` | Contact form submission | Public |
-| GET | `/api/popularcontest` | Fetch popular contests list | Public |
+# Email (Nodemailer)
+EMAIL_USER=
+EMAIL_PASS=
 
-## Database Collections / Models
+# Auth
+NEXTAUTH_SECRET_KEY=
+NEXTAUTH_REFRESH_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_ID=
+GITHUB_SECRET=
 
-| Collection | Purpose |
-|---|---|
-| `users` | Stores user accounts, roles, profile data, provider info |
-| `contests` | Stores contest metadata, status, creator, prize, deadline |
-| `payments` | Stores payment records, submission status, tracking, winner flags |
+# Stripe
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+```
 
-## User Roles
-- User
-- Creator
-- Admin
+> ⚠️ All variables above are required. Missing values will disable the related feature (auth, email, payments, or image upload).
 
-## Authentication Flow
-- NextAuth is configured for Google and GitHub OAuth.
-- Social login inserts or updates users in MongoDB.
-- `jwt` callback enriches token with user role, provider, phone, image.
-- `session` callback exposes authentication state to client.
-- Custom login uses `/api/auth/login`, validates credentials, issues JWT access & refresh cookies.
-- Protected backend routes verify tokens via `verifyToken`.
-- Role-specific middleware uses `verifyAdmin` and `verifyCreator`.
-- Logout clears auth cookies and redirects to login.
+## Test Credentials
 
-## Admin Panel
-- Admin dashboard with platform analytics
-- Manage users, roles, and creator status
-- Approve/reject contests
-- Delete contests
-- Send invitation emails to users with roles
-- Access admin-only API endpoints
+| Role        | Email             | Password    |
+| ----------- | ----------------- | ----------- |
+| **Creator** | `user@gmail.com`  | `123456Aa!` |
+| **Admin**   | `admin@gmail.com` | `123456Aa!` |
 
-## Contest Management System
-- Creators submit contests via `/create-contest`
-- Admin reviews via `/dashboard/manage-contests`
-- Approved contests become visible to public contest listing
-- Users pay to join contests using Stripe checkout
-- Paid users can submit assignments through contest submission endpoints
-- Creators can declare winners after contest deadline
-- Contest status tracked through `adminStatus`, `paymentStatus`, `contestStatus`
-- Winner selection writes `isWinner` in payments and updates contest metadata
+## Security
 
-## Security Measures
 - JWT authentication with HTTP-only cookies
-- Role-based access control in backend middleware
+- Role-based access control via backend middleware (`verifyToken`, `verifyAdmin`, `verifyCreator`)
 - NextAuth social provider session management
-- Password hashing using bcrypt
-- Token validation in API requests
+- Password hashing with bcrypt
+- Server-side session validation
 - Admin-only and creator-only route protection
-- Email invite tokens expire after 24 hours
+- Invitation tokens expire after 24 hours
 
 ## Performance Optimizations
-- Frontend uses React Query for caching API requests
-- ResponsiveContainer charts for efficient rendering
+
+- React Query caching for API requests
+- `ResponsiveContainer` charts for efficient rendering
 - Server-side metadata generation for dashboard pages
 - Centralized secure Axios instance for request reuse
-- MongoDB query pagination and skip/limit usage
-- Cloudinary remote image support via Next.js remotePatterns
+- MongoDB pagination via skip/limit
+- Cloudinary remote image support via Next.js `remotePatterns`
 
-## Deployment Instructions
-- Build with `npm run build`
-- Start with `npm start`
-- Deploy on Vercel using this repo
-- Ensure environment variables are configured in Vercel dashboard
+## Deployment
 
-## Future Improvements
-- Add database models/schema validation layer
-- Implement better error handling and logging
-- Introduce unit/integration tests
-- Add role-based route guards on server side
-- Build an admin analytics dashboard with more reporting
-- Add contest categories management in admin UI
-- Add repeated contest scheduling and prize history
+1. Build the project: `npm run build`
+2. Start the server: `npm start`
+3. Deploy via [Vercel](https://vercel.com) using this repository
+4. Configure all required environment variables in the Vercel dashboard
+
+## Roadmap
+
+- [ ] Database schema validation layer
+- [ ] Improved error handling and logging
+- [ ] Unit and integration tests
+- [ ] Server-side role-based route guards
+- [ ] Expanded admin analytics and reporting
+- [ ] Contest category management in the admin UI
+- [ ] Recurring contest scheduling and prize history
 
 ## Contributors
-- Project repository: https://github.com/EmonHira135923/Contest-Hub-Platform
-- Project LiveLink: https://contest-hub-platform.vercel.app
+
+- **Repository:** [Contest-Hub-Platform](https://github.com/EmonHira135923/Contest-Hub-Platform)
+- **Live Demo:** [contest-hub-platform.vercel.app](https://contest-hub-platform.vercel.app)
 
 ## License
-Not detected in project
+
+No license currently specified for this project.
